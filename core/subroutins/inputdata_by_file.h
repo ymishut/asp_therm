@@ -1,35 +1,29 @@
-#ifndef SRC_INPUTDATA_BY_FILE_H_
-#define SRC_INPUTDATA_BY_FILE_H_
+#ifndef _CORE__SUBROUTINS__INPUTDATA_BY_FILE_H_
+#define _CORE__SUBROUTINS__INPUTDATA_BY_FILE_H_
+
+#include <boost/noncopyable.hpp>
 
 #include <fstream>
 #include <vector>
 #include <string>
 #include <utility>
 
-#include <boost/noncopyable.hpp>
+class InputData: private boost::noncopyable {
+public:
+  explicit InputData(const std::string &filename);
 
-namespace real_gas_models {
-  //================================
-  // InputData
-  //================================
+  std::vector<double> getConstgasparameters();
+  std::pair<double, double> getBalloonVF();
+  std::vector<double> getBalloonParameters();
+  std::string getFunction();
+  std::string getEquation();
+  std::string getFlowType();
+  static void makeExampleInput();
 
-  class InputData: private boost::noncopyable {
-  public:
-    explicit InputData(const std::string &filename);
+private:
+  std::ifstream infile_;
+  std::vector<std::string> inputParameters_;
+};
 
-    std::vector<float> getConstgasparameters();
-    std::pair<float, float> getBalloonVF();
-    std::vector<float> getBalloonParameters();
-    std::string getFunction();
-    std::string getEquation();
-    std::string getFlowType();
-    static void makeExampleInput();
-
-  private:
-    std::ifstream infile_;
-    std::vector<std::string> inputParameters_;
-  };
-}  // namespace real_gas_models
-
-#endif  // SRC_INPUTDATA_BY_FILE_H_
+#endif  // _CORE__SUBROUTINS__INPUTDATA_BY_FILE_H_
 

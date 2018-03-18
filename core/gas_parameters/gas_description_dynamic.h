@@ -1,74 +1,45 @@
-#ifndef SRC_GAS_DESCRIPTION_DYNAMIC_H_
-#define SRC_GAS_DESCRIPTION_DYNAMIC_H_
-
-#include <iostream>
-#include <memory>
+#ifndef _CORE__GAS_PARAMETERS__GAS_DESCRIPTION_DYNAMIC_H_
+#define _CORE__GAS_PARAMETERS__GAS_DESCRIPTION_DYNAMIC_H_
 
 #include "gas_description.h"
+#include "gas_description_static.h"
 
-namespace real_gas_models {
-  class gasparameters_dynamic;
-  //================================
-  // potentials (class)
-  //================================
+#include <iostream>
 
-  class potentials {
-    friend class gasparameters_dynamic;
-    friend std::ostream& operator<< (std::ostream & outstream, 
-                                          const potentials &pt);
+/*
+ * PARAMETERS OF GAS IN DYNAMIC.
+ *
+ * Параметры газа в динамике.
+ *   Основная структура данных
+ * По сути это совокупность других структур
+ *   с элементами ООП
+*/
+/// DEVELOP
+///   Классификатор final классная штука:
+///     -- не даёт наследываться
+///     -- компилятор лучше обрабатывает перегруженные функции
 
-    float  internalenergy,
-           Hermholtz_free,
-           enthalpy,
-           Gibbsfree,
-           LandauGrand,
-           // entropy not potential but calculating in dynamic have sense
-           entropy;    
-    potentials() {}
-  };
+class GasParameters_dyn final: public GasParameters {
+public:
+  GasParameters_dyn(double v, double p, double t,
+      const_parameters cgp, dyn_parameters dgp,  dyn_params_update update_f);
+  GasParameters_dyn(parameters prs,
+      const_parameters cgp, dyn_parameters dgp, dyn_params_update update_f);
+  GasParameters_dyn(const_parameters cgp, dyn_parameters dgp,
+      dyn_params_update update_f);
 
-  std::ostream& operator<< (std::ostream & outstream, const potentials &pt);
+  void csetParameters(double v,
+      double p, double t, state_phase) override;
 
-  //================================
-  // gasparameters_dynamic
-  //================================
+private:
+  // previous pressure, volume and temperature
+  parameters        prev_vpte_;
+  // function for update dyn_parameters
+  dyn_params_update update_f_;
+  // potentials      potentials_;
+};
 
-  class gasparameters_dynamic: public Igasparameters {
-  public:
-    gasparameters_dynamic(float v, float p, float t,
-             std::shared_ptr<constgasparameters> cgp);
-    gasparameters_dynamic(parameters prs, 
-             std::shared_ptr<constgasparameters> cgp);
+std::ostream& operator<< (std::ostream &outstream,
+    const GasParameters_dyn &gp);
 
-    float cgetV_K()            const;
-    float cgetP_K()            const;
-    float cgetT_K()            const;
-    float cgetMolecularMass()  const;
-    float cgetAdiabatic()      const;
-    float cgetCV()             const;
-    float cgetBeta()           const;
-    float cgetR()              const;
-    float cgetAcentricFactor() const;
-    float cgetVolume()         const;
-    float cgetPressure()       const;
-    float cgetTemperature()    const;
-    state_phase cgetState()    const;
-    parameters cgetParameters()const;
-    std::shared_ptr <constgasparameters> cgetConstparameters() const;
-
-    void csetParameters(float v, float p, float t, state_phase sp);
-
-  private:
-    parameters            current_vpte_,
-                          previous_vpte_;
-    potentials            potentialslist_;
-    state_phase           sph_;
-    std::shared_ptr<constgasparameters> constparameters_;
-  };
-
-  std::ostream& operator<< (std::ostream &outstream,
-                     const gasparameters_dynamic &gp);
-}  // namespace real_gas_models
-
-#endif  // SRC_GAS_DESCRIPTION_DYNAMIC_H_
-
+#endif  // _CORE__GAS_PARAMETERS__GAS_DESCRIPTION_DYNAMIC_H_

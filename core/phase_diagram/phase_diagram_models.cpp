@@ -8,15 +8,15 @@
 ///
 
 
-double real_gas_models::lineIntegrateRK2::operator() (
-        double t, double vLeft, double vRigth, double) {
+double lineIntegrateRK2::operator() (
+    double t, double vLeft, double vRigth, double) {
   const double gam = 0.25992;
   return 3.0 * t * (std::log(std::abs(vRigth-gam)) - std::log(std::abs(vLeft-gam))) +
       14.80139 * (std::log((vRigth+gam)/vRigth) - std::log((vLeft+gam)/vLeft)) /
       std::sqrt(t);
 }
 
-void real_gas_models::initializeRK2::operator() (std::vector<double> &tempvec,
+void initializeRK2::operator() (std::vector<double> &tempvec,
                                                   double pi, double t, double) {
   tempvec[0] = 1.0;
   tempvec[1] = -3.0*t/pi;
@@ -24,17 +24,17 @@ void real_gas_models::initializeRK2::operator() (std::vector<double> &tempvec,
   tempvec[3] = -1.0/(pi*std::sqrt(t));
 }
 
-double real_gas_models::lineIntegratePR::operator() (
+double lineIntegratePR::operator() (
     double t, double vLeft, double vRigth, double ac) {
   const double J   = 3.253,
                alf = std::pow((1.0+(0.37464 + 1.54226 * ac-0.26992*ac*ac)*
                      (1.0-std::sqrt(t))), 2.0);
   return t*J*(std::log(std::abs(vRigth-0.25))-std::log(std::abs(vLeft-0.25))) +
-          6.8448*alf*(std::log(std::abs((vRigth+0.60355)/(vRigth-0.10355))) -
-          std::log(std::abs((vLeft+0.60355)/(vLeft-0.10355))));
+      6.8448*alf*(std::log(std::abs((vRigth+0.60355)/(vRigth-0.10355))) -
+      std::log(std::abs((vLeft+0.60355)/(vLeft-0.10355))));
 }
 
-void real_gas_models::initializePR::operator() (std::vector<double> &tempvec,
+void initializePR::operator() (std::vector<double> &tempvec,
                                               double pi, double t, double ac) {
   const double alf = std::pow((1.0+(0.37464 + 1.54226 * ac-0.26992*ac*ac)*(1.0-t)), 2.0);
   tempvec[0] = 1.0;

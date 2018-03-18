@@ -1,6 +1,7 @@
 #include "gas_description.h"
+
+#include "models_errors.h"
 #include "models_math.h"
-#include "models_exceptions.h"
 
 //=========================================================================
 // dyn_parameters
@@ -42,7 +43,7 @@ const_parameters
   if (!correct_input)
     return nullptr;
   // 8314.4599 - универсальная газовая постоянная
-  //             GAS CONSTANT - physics constant
+  //           - GAS CONSTANT - physics constant
   double tempR = 8314.4599 / mol;
   return new const_parameters(vk, pk, tk, mol, tempR, af);
 }
@@ -53,3 +54,24 @@ const_parameters
   return Init(vec[0], vec[1], vec[2], vec[3], vec[4], vec[5], vec[6]);
 }
 */
+
+// ================================================================
+// check data functions
+// ================================================================
+bool is_valid_cgp(const const_parameters &cgp) {
+  if (!is_above0(cgp.acentricfactor, cgp.molecularmass,
+      cgp.P_K, cgp.R, cgp.T_K,cgp.V_K)) {
+    set_error_code(ERR_INIT | ERR_INIT_ZERO);
+    return false;
+  }
+  return true;
+}
+
+bool is_valid_dgp(const dyn_parameters &dgp) {
+  if (!is_above0(dgp.adiabatic_index, dgp.beta_kr,
+      dgp.heat_cap_vol)) {
+    set_error_code(ERR_INIT | ERR_INIT_ZERO);
+    return false;
+  }
+  return true;
+}

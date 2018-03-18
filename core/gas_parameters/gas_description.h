@@ -1,10 +1,10 @@
 #ifndef _CORE__GAS_PARAMETERS__GAS_DESCRIPTION_H_
 #define _CORE__GAS_PARAMETERS__GAS_DESCRIPTION_H_
 
-// #include <array>
-#include <memory>
+#include "common.h"
+
+#include <array>
 #include <string>
-#include <vector>
 
 #include <stdint.h>
 
@@ -19,7 +19,7 @@
  *   душам с разработчиком -- приветствуются. Вот его email:
  *      korteelko@gmail.com
  *
- * Итак прежде всего:
+ * Итак прежде всего читателю:
  *   1) С++11  -- удобно, объектною.Сложные структуры данных пишем на нём
  *   2) Pure C -- часто более понятно разработчику.
  *     Не стоит всякую мелочь оборачивать в кучу оберток, проверок-перепроверок
@@ -27,16 +27,19 @@
  *     Не стоит нашивать на логичные struct C в их изначальном смысле
  *     простого блока памяти С++ возможности. 'С' прекрасен сам по себе.
  *   3) Архитектура проекта. Разбито с точки зрения теплофизика, не программиста
- *   4) Напишите сами.
+ *   4) Напишите это сами.
+ *
+ *
+ *   UPD: комментарий с меткой "DEVELOP" предложение к разработчику
 */
 
 /*
  * ФАЙЛ БАЗОВЫХ СТРУКТУР ПРОЕКТА
  */
 
-//================================
+// ================================================================
 // state_phase enum || stateToString
-//================================
+// ================================================================
 /// Агрегатное состояние вещества (как )
 /// SCF: t>T_K, p>P_K;    GAS: p_binodal < p < p_K, t>t_binodal;
 /// LIQUID: p<P_K; v<vleft;
@@ -49,12 +52,12 @@ enum class state_phase : int32_t {
   LIQ_STEAM,
   GAS
 };
-static const std::vector<std::string> stateToString {
+static const std::array<std::string, 4> stateToString {
   "SCF", "LIQUID", "LIQ_STEAM", "GAS"};
 
-//================================
+// ================================================================
 // parameters struct
-//================================
+// ================================================================
 /// Общие параметры состояния вещества,
 ///   для описания его текущего состояния с размерностями
 /// Common parameters of substance for describing
@@ -65,16 +68,21 @@ struct parameters {
           temperature;          // K
 };
 
-//================================
+// ================================================================
 // dyn_parameters struct
-//================================
+// ================================================================
 /// Динамические параметры вещества, зависящие от
 ///   других его параметров
 /// Dynamic parameters of substance
+/// DEVELOP
+///   По структурам dyn_- и const_parameters
+///     идея закрыть все уонструкторы кроме копирующих
+///     Инит методы обеспечат корректное создание, а далее
+///     изменение полей возлагается на методы мспользуемой модели
 struct dyn_parameters {
-private:
   double adiabatic_index,
          heat_cap_vol,     // heat capacity for volume = const // Cv
+         interval_energy,  //
          beta_kr;          // beta_kr=beta_kr(adiabatic_index)
                            //   = [0.0, ... ,1.0]
                            //   if (pressure_1/pressure_2 < beta_kr):
@@ -94,15 +102,34 @@ public:
   static dyn_parameters *Init(double ai, double cv, parameters pm);
 //  void Update();
 };
+
 /// Указатель на функцию обновления динамических параметров
 ///   (зависит от используемой модели реального газа)
 /// Pointer to dynaparameter updating function
 ///   (depended by real gas model)
-void (*dyn_params_update)(dyn_parameters &prev_state,
+typedef void (*dyn_params_update)(dyn_parameters &prev_state,
     const parameters new_state);
-//================================
+// ================================================================
+// potentials struct
+// ================================================================
+/// Потенциалы сложная(м.б. и не очень) часть
+///   часть ДИНАМИКИ системы
+/// На данный момент в планах нет задач задействующих её
+/*
+struct potentials {
+  double  // internalenergy,
+         Hermholtz_free,
+         enthalpy,
+         Gibbsfree,
+         LandauGrand,
+         // entropy not potential but calculating in dynamic have sense
+         entropy;
+};
+*/
+
+// ================================================================
 // const_parameters struct
-//================================
+// ================================================================
 /// параметры газа, зависящие от его ффизической природы и
 ///   не изменяющиеся при изменении его состояния
 /// gas paramaters depending on the physics characteristics
@@ -125,11 +152,19 @@ public:
 
 };
 
+// ================================================================
+// check data functions
+// ================================================================
+/// Функции проверки валидности данных
+bool is_valid_cgp(const const_parameters &cgp);
+bool is_valid_dgp(const cdyn_parameters &dgp);
+
+
 //================================
 // IGas_parameters interface
 //================================
 /// Интерфейс доступа к динамическим и статическим парамертам
-class IGas_parameters {
+/* class IGas_parameters {
 public:
   virtual double cgetV_K()            const = 0;
   virtual double cgetP_K()            const = 0;
@@ -150,5 +185,5 @@ public:
   virtual void csetParameters(double, double, double, state_phase) = 0;
   virtual ~Igasparameters() {}
 };
-
+*/
 #endif  // _CORE__GAS_PARAMETERS__GAS_DESCRIPTION_H_

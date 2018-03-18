@@ -1,5 +1,5 @@
-#ifndef SRC_FILEREADING_H_
-#define SRC_FILEREADING_H_
+#ifndef _CORE__SUBROUTINS__FILE_READING_H_
+#define _CORE__SUBROUTINS__FILE_READING_H_
 
 #include <string>
 #include <vector>
@@ -8,41 +8,33 @@
 
 #include <boost/noncopyable.hpp>
 
-namespace real_gas_models {
-  //================================
-  // ReadFile
-  //================================
+#include <stdint.h>
 
-  class ReadFile : private boost::noncopyable {
-    size_t currentLine_,
+class ReadFile : private boost::noncopyable {
+  uint32_t currentLine_,
            currentSignificantLine_;
-    std::string line_;
+  std::string line_;
 
-    class ReadFileError;
+  class ReadFileError;
 
-  private:
-    void lineProcessing();
+private:
+  void lineProcessing();
 
-  public:
-    std::vector<std::string> parseFile(std::ifstream &instream);
-  };
+public:
+  std::vector<std::string> parseFile(std::ifstream &instream);
+};
 
-  //================================
-  // ReadFileError
-  //================================
+/*
+class ReadFile::ReadFileError: public std::exception {
+  std::string message_;
 
-  class ReadFile::ReadFileError: public std::exception {
-    std::string message_;
+public:
+  ReadFileError(int linnum, std::string message);
 
-  public:
-    ReadFileError(int linnum, std::string message);
-
-    virtual const char* what() const noexcept {
-      return message_.c_str();
-    }
-    ~ReadFileError() noexcept {}
-  };
-}  // namespace real_gas_models
-
-#endif  // SRC_FILEREADING_H_
-
+  virtual const char* what() const noexcept {
+    return message_.c_str();
+  }
+  ~ReadFileError() noexcept {}
+};
+*/
+#endif  // _CORE__SUBROUTINS__FILE_READING_H_

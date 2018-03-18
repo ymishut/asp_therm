@@ -1,118 +1,109 @@
 #include "gas_description_static.h"
-#include "models_exceptions.h"
 
-//================================
-// gasparameters ctor
-//================================
+GasParameters::GasParameters(double v, double p, double t,
+    const const_parameters cgp, dyn_parameters dgp)
+  : vpte_(parameters{v, p, t}), const_parameters_(cgp),
+    dyn_parameters_(dgp){}
 
-real_gas_models::gasparameters::gasparameters(float v, float p, float t,
-                                  std::shared_ptr<constgasparameters> cgp)
-  :vpte_(v, p, t), constparameters_(cgp) {
-  if (cgp == nullptr)
-    throw modelExceptions(
-        "gasparameters_static::gasparameters_static\
-         gets nullptr to constgasparameters");
+GasParameters::GasParameters(parameters prs,
+    const_parameters cgp, dyn_parameters dgp)
+  : vpte_(prs), const_parameters_(cgp), dyn_parameters_(dpg) {}
+
+GasParameters::GasParameters(parameters prs,
+    parameters_mix components)
+  : vpte_(prs) {
+  for (auto const &x : components) {
+
+  }
 }
 
-//================================
-// gasparameter ctor
-//================================
+GasParameters::~GasParameters() {}
 
-real_gas_models::gasparameters::gasparameters(real_gas_models::parameters prs,
-                                        std::shared_ptr<constgasparameters> cgp)
-  :vpte_(prs), constparameters_(cgp) {
-  if (cgp == nullptr)
-    throw modelExceptions(
-        "gasparameters_static::gasparameters_static\
-         gets nullptr to constgasparameters");
-}
-
-//================================
-// gasparameter operator <<
-//================================
-
-std::ostream &real_gas_models::operator<< (std::ostream &outstream,
-                                           const gasparameters &gp) {
+std::ostream &operator<< (std::ostream &outstream,
+    const GasParameters &gp) {
   outstream << "v: " << gp.cgetVolume() << " p: " << gp.cgetPressure()
             << " t: " << gp.cgetTemperature() << "\n";
   return outstream;
 }
 
-//================================
-// gasparameter getters
-//================================
+//==================================================================
+// const_gasparametrs fields
+//==================================================================
 
-float real_gas_models::gasparameters::cgetV_K() const {
-  return constparameters_->V_K;
+double GasParameters::cgetV_K() const {
+  return const_parameters_.V_K;
 }
 
-float real_gas_models::gasparameters::cgetP_K() const {
-  return constparameters_->P_K;
+double GasParameters::cgetP_K() const {
+  return const_parameters_.P_K;
 }
 
-float real_gas_models::gasparameters::cgetT_K() const {
-  return constparameters_->T_K;
+double GasParameters::cgetT_K() const {
+  return const_parameters_.T_K;
 }
 
-float real_gas_models::gasparameters::cgetMolecularMass() const {
-  return constparameters_->molecularmass;
+double GasParameters::cgetMolecularMass() const {
+  return const_parameters_.molecularmass;
 }
 
-float real_gas_models::gasparameters::cgetAdiabatic() const {
-  return constparameters_->adiabatic_index;
+double GasParameters::cgetR() const {
+  return const_parameters_.R;
 }
 
-float real_gas_models::gasparameters::cgetCV() const {
-  return constparameters_->cv;
+double GasParameters::cgetAcentricFactor() const {
+  return const_parameters_.acentricfactor;
 }
 
-float real_gas_models::gasparameters::cgetBeta() const {
-  return constparameters_->beta_kr;
+//==================================================================
+// dyn_gasparametrs fields
+//==================================================================
+double GasParameters::cgetAdiabatic() const {
+  return dyn_parameters_.adiabatic_index;
 }
 
-float real_gas_models::gasparameters::cgetR() const {
-  return constparameters_->R;
+double GasParameters::cgetCV() const {
+  return dyn_parameters_.heat_cap_vol;
 }
 
-float real_gas_models::gasparameters::cgetAcentricFactor() const {
-  return constparameters_->acentricfactor;
+double GasParameters::cgetBeta() const {
+  return dyn_parameters_.beta_kr;
 }
 
-float real_gas_models::gasparameters::cgetVolume() const {
+//==================================================================
+// current parametrs of gas
+//==================================================================
+
+double GasParameters::cgetVolume() const {
   return vpte_.volume;
 }
 
-float real_gas_models::gasparameters::cgetPressure() const {
+double GasParameters::cgetPressure() const {
   return vpte_.pressure;
 }
 
-float real_gas_models::gasparameters::cgetTemperature() const {
+double GasParameters::cgetTemperature() const {
   return vpte_.temperature;
 }
 
-real_gas_models::state_phase
-real_gas_models::gasparameters::cgetState() const {
+state_phase GasParameters::cgetState() const {
   return sph_;
 }
 
-real_gas_models::parameters
-real_gas_models::gasparameters::cgetParameters() const {
-  return parameters(vpte_);
+parameters GasParameters::cgetParameters() const {
+  return vpte_;
 }
 
-std::shared_ptr<real_gas_models::constgasparameters>
-real_gas_models::gasparameters::cgetConstparameters() const {
-  return constparameters_;
+dyn_parameters GasParameters::cgetDynParameters() const {
+  return dyn_parameters_;
 }
 
-//================================
-// gasparameter::csetParameters
-//================================
+const_parameters GasParameters::cgetConstparameters() const {
+  return const_parameters_;
+}
 
-void real_gas_models::gasparameters::csetParameters(float v, float p, float t,
-                                                               state_phase sp) {
-  vpte_.volume        = v;
-  vpte_.pressure      = p;
-  vpte_.temperature   = t;
-  sph_                = sp;
+// virtual
+void GasParameters::csetParameters(double v, double p, double t,
+    state_phase sp) {
+  vpte_ = {v,p,t};
+  sph_  = sp;
 }

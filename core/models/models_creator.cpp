@@ -1,85 +1,93 @@
 #include "models_creator.h"
-#include "models_exceptions.h"
-#include "models_output.h"
-#include "dynamic_modeling.h"
-#include "model_ideal_gas.h"
-#include "model_redlich_kwong.h"
-#include "model_peng_robinson.h"
-#include "inputdata_by_file.h"
-#include "gas_description.h"
 
-#include <map>
-#include <utility>
-#include <functional>
-#include <string>
-#include <vector>
+#include "models_errors.h"
+
+#include "gas_parameters/gas_description.h"
+#include "subroutins//models_output.h"
+#include "subroutins/inputdata_by_file.h"
+#include "phase_diagram/phase_diagram.h"
+// #include "dynamic_modeling.h"
 
 #include <boost/optional.hpp>
 
-extern const float  MODELS_DTIME;
+#include <functional>
+#include <map>
+#include <string>
+#include <vector>
+#include <utility>
+
+
+Equation_of_state::~Equation_of_state() {}
+
+
+modelGeneral *Ideal_gas_equation::GetCalculatingModel(
+    modelName mn = modelName::REDLICH_KWONG2,
+    const_parameters cgp, dyn_parameters dgp) {
+  // calculate binodal points
+  reset_error();
+  binodalpoints bp = PhaseDiagram::GetCalculated().GetBinodalPoints(
+       cgp.V_K, cgp.P_K, cgp.T_K, phasediag_model_, cgp.acentricfactor);
+  // check calculated bp
+  if (bp.p.empty()) {
+    std::cerr << get_error_message();
+    std::cerr << "\n Could not create Idealgas Solver\n" << std::endl;
+    return nullptr;
+  }
+  return IdealGas::Init(mn, cgp, dgp, bp);
+}
+
+modelGeneral *Redlich_Kwong_equation::GetCalculatingModel(
+    modelName mn = modelName::REDLICH_KWONG2,
+    const_parameters cgp, dyn_parameters dgp) {
+  // calculate binodal points
+  reset_error();
+  binodalpoints bp = PhaseDiagram::GetCalculated().GetBinodalPoints(
+       cgp.V_K, cgp.P_K, cgp.T_K, phasediag_model_, cgp.acentricfactor);
+  // check calculated bp
+  if (bp.p.empty()) {
+    std::cerr << get_error_message();
+    std::cerr << "\n Could not create RedlichKwong2 Solver\n" << std::endl;
+    return nullptr;
+  }
+  return Redlich_Kwong2::Init(mn, cgp, dgp, bp);
+}
+
+modelGeneral *Peng_Robinson_equation::GetCalculatingModel(
+    modelName mn = modelName::PENG_ROBINSON,
+    const_parameters cgp, dyn_parameters dgp) {
+  // calculate binodal points
+  reset_error();
+  binodalpoints bp = PhaseDiagram::GetCalculated().GetBinodalPoints(
+       cgp.V_K, cgp.P_K, cgp.T_K, phasediag_model_, cgp.acentricfactor);
+  // check calculated bp
+  if (bp.p.empty()) {
+    std::cerr << get_error_message();
+    std::cerr << "\n Could not create PengRobinson Solver\n" << std::endl;
+    return nullptr;
+  }
+  return Peng_Robinson::Init(mn, cgp, dgp, bp);
+}
+
+/*  to another file
+
+// Конфигурация расчёта, может изменяться
+//   если файл кфг изменился, или ещё что
+// Определены в subroutins/load_config.cpp
+extern const double MODELS_DTIME;
 extern const size_t MODELS_STEPS;
 
 namespace {
-  std::map<std::string, int> equations {
+  std::map<std::string, int32_t> equations {
       {"IDEAL_GAS", 1}, {"REDLICH_KWONG", 2}, {"PENG_ROBINSON", 3}};
 }
-
-//================================
-// Ideal_gas_equation::getCalculatingModel
-//================================
-
-real_gas_models::modelGeneral *
-real_gas_models::Ideal_gas_equation::getCalculatingModel(
-    modelName mn, std::shared_ptr<constgasparameters> &cgp) {
-  try {
-    return new idealGas(mn, cgp);
-  } catch (modelExceptions& e) {
-    std::cout << "Object idealGas wasn't created.\n" 
-              << e.what() << std::endl;
-  }
-  return nullptr;
-}
-
-//================================
-// Redlich_Kwong_equation::getCalculatingModel
-//================================
-
-real_gas_models::modelGeneral *
-real_gas_models::Redlich_Kwong_equation::getCalculatingModel(
-    modelName mn, std::shared_ptr<constgasparameters> &cgp) {
-  try {
-    return new Redlich_Kwong2(mn, cgp);
-  } catch (modelExceptions& e) {
-    std::cout << "Object Redlich_Kwong2 wasn't created.\n" 
-              << e.what() << std::endl;
-  }
-  return nullptr;
-}
-
-//================================
-// Peng_Robinson_equation::getCalculatingModel
-//================================
-
-real_gas_models::modelGeneral *
-real_gas_models::Peng_Robinson_equation::getCalculatingModel(
-    modelName mn, std::shared_ptr<constgasparameters> &cgp) {
-  try {
-    return new Peng_Robinson(mn, cgp);
-  } catch (modelExceptions& e) {
-    std::cout << " Object Peng_Robinson wasn't created.\n" 
-              << e.what() << std::endl;
-  }
-  return nullptr;
-}
-
 //================================
 // GasDynamic::getFlowCalculator
 //================================
 
-real_gas_models::balloonFlowDynamic *
-real_gas_models::GasDynamic::getFlowCalculator(
-                 const std::shared_ptr<real_gas_models::modelGeneral> &spmg,
-               real_gas_models::gasparameters &outballoon, float V, float F) {
+balloonFlowDynamic *
+GasDynamic::getFlowCalculator(
+                 const std::shared_ptr<modelGeneral> &spmg,
+               gasparameters &outballoon, double V, double F) {
   if (spmg == nullptr) {
       std::cout << 
         "Object FlowCalculator wasn't created. Constructor get nullptr\n";
@@ -98,7 +106,7 @@ real_gas_models::GasDynamic::getFlowCalculator(
 // GasDynamic::calculation
 //================================
 
-void real_gas_models::GasDynamic::calculation(std::shared_ptr<InputData> &idp) {
+void GasDynamic::calculation(std::shared_ptr<InputData> &idp) {
   if (idp == nullptr) {
       std::cout << " Calculation method get nullptr to InputData";
       return;
@@ -141,11 +149,11 @@ void real_gas_models::GasDynamic::calculation(std::shared_ptr<InputData> &idp) {
 // GasDynamic::setCalculator
 //================================
 
-real_gas_models::balloonFlowDynamic *real_gas_models::GasDynamic::setCalculator(
-                             std::shared_ptr<real_gas_models::modelGeneral> &mg,
+balloonFlowDynamic *GasDynamic::setCalculator(
+                             std::shared_ptr<modelGeneral> &mg,
                                             std::shared_ptr<gasparameters> &pgp) {
-  std::vector<float> params       = idp_->getBalloonParameters();
-  std::pair<float, float> balloon = idp_->getBalloonVF();
+  std::vector<double> params       = idp_->getBalloonParameters();
+  std::pair<double, double> balloon = idp_->getBalloonVF();
   char func = idp_->getFunction()[0];
   try {
     switch (func) {
@@ -176,8 +184,8 @@ real_gas_models::balloonFlowDynamic *real_gas_models::GasDynamic::setCalculator(
 // GasDynamic::setEOS
 //================================
 
-std::shared_ptr<real_gas_models::Equation_of_state>
-real_gas_models::GasDynamic::setEOS() {
+std::shared_ptr<Equation_of_state>
+GasDynamic::setEOS() {
   int eosch;
   std::shared_ptr<Equation_of_state> eos;
   try {
@@ -201,3 +209,4 @@ real_gas_models::GasDynamic::setEOS() {
     }
   return eos;
 }
+*/

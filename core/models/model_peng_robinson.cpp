@@ -1,113 +1,125 @@
 #include "model_peng_robinson.h"
-#include "models_exceptions.h"
+
+#include "models_errors.h"
 #include "models_math.h"
 
 #include <iostream>
 #include <vector>
 
-//================================
-// Peng_Robinson ctor
-//================================
+/// =========================================================================
+/// Peng_robinson methods
+/// =========================================================================
 
-real_gas_models::Peng_Robinson::Peng_Robinson(modelName mn,
-                     std::shared_ptr<constgasparameters> &cgp)
-  :modelGeneral::modelGeneral(mn, cgp) {
+Peng_Robinson::Peng_Robinson(modelName mn,
+    const_parameters cgp, dyn_parameters dgp, binodalpoints bp)
+  : modelGeneral::modelGeneral(mn, cgp, dgp, bp) {
   modelCoefA_ = 0.45724 * std::pow(parameters_->cgetR(), 2.0) *
-    std::pow(parameters_->cgetT_K(), 2.0) / parameters_->cgetP_K();
+      std::pow(parameters_->cgetT_K(), 2.0) / parameters_->cgetP_K();
   modelCoefB_ = 0.0778 * parameters_->cgetR() * parameters_->cgetT_K() /
-    parameters_->cgetP_K();
+      parameters_->cgetP_K();
   modelCoefK_ = 0.37464 + 1.54226*parameters_->cgetAcentricFactor() -
-               0.26992*std::pow(parameters_->cgetAcentricFactor(), 2.0);
+      0.26992*std::pow(parameters_->cgetAcentricFactor(), 2.0);
 }
 
-//================================
-// Peng_Robinson::dynamicflowAccept (visitor accept)
-//================================
+Peng_Robinson::Peng_Robinson(modelName mn, parameters_mix components,
+    binodalpoints bp) {
 
-void real_gas_models::Peng_Robinson::dynamicflowAccept(DerivateFunctor &df) {
+}
+
+Peng_Robinson *Peng_Robinson::Init(modelName mn, const_parameters cgp,
+    dyn_parameters dgp, binodalpoints bp) {
+  // check const_parameters
+  if (!is_valid_cgp(cgp))
+    return nullptr;
+  if (!is_valid_dgp(dgp))
+    return nullptr;
+  return new Peng_Robinson(mn, cgp, dgp, bp);
+}
+
+Peng_Robinson *Peng_Robinson::Init(modelName mn, parameters_mix components,
+      binodalpoints bp) {
+  reset_error();
+  // для проверки установленных доль
+  double percents = 0.0;
+  for (const auto &x : components) {
+    if (!is_above0(x.first)) {
+      set_error_code(ERR_INIT);
+      return nullptr;
+    }
+    percents += x.first;
+    if (!is_valid_cgp(x.second.first))
+      return nullptr;
+    if (!is_valid_dgp(x.second.second))
+      return nullptr;
+  }
+  if (std::abs(0.99 - percents) > GAS_MIX_PERCENT_EPS) {
+    set_error_code(ERR_CALCULATE | ERR_CALC_GAS_P);
+    return nullptr;
+  }
+  return new Peng_Robinson(mn, components, bp);
+}
+
+void Peng_Robinson::DynamicflowAccept(DerivateFunctor &df) {
   return df.getFunctor(*this);
 }
 
-//================================
-// Peng_Robinson::isValid
-//================================
-
-bool real_gas_models::Peng_Robinson::isValid() const {
+bool Peng_Robinson::IsValid() const {
   return (parameters_->cgetState() != state_phase::LIQUID);
 }
 
-//================================
-// Peng_Robinson setters
-//================================
-
-void real_gas_models::Peng_Robinson::setVolume(float p, float t) {
-  setParameters(getVolume(p, t), p, t);
+void Peng_Robinson::SetVolume(double p, double t) {
+  setParameters(GetVolume(p, t), p, t);
 }
 
-void real_gas_models::Peng_Robinson::setPressure(float v, float t) {
-  setParameters(v, getPressure(v, t), t);
+void Peng_Robinson::SetPressure(double v, double t) {
+  setParameters(v, GetPressure(v, t), t);
 }
 
-//================================
-// Peng_Robinson::getVolume
-//================================
-
-float real_gas_models::Peng_Robinson::getVolume(float p, float t) const {
-  if ((p <= 0.0) || (t <= 0.0))
-    throw modelExceptions("Peng_Robinson::setVolume bad input p: "
-        + std::to_string(p) + " t: " + std::to_string(t));
-  float alf = std::pow(1.0 + modelCoefK_*(1.0 -
-               t / parameters_->cgetT_K()), 2.0);
-  std::vector<float> coef {1.0,
-                           modelCoefB_ - parameters_->cgetR()*t/p,
-                           (modelCoefA_*alf - 2.0f * modelCoefB_ *
-                 parameters_->cgetR()*t)/p-3.0f*modelCoefB_*modelCoefB_,
-                           std::pow(modelCoefB_, 3.0f) + (parameters_->cgetR()*
-                t *modelCoefB_*modelCoefB_ - modelCoefA_ * alf *modelCoefB_)/p,
-                           0.0, 0.0, 0.0};
-  try {
-    CardanoMethod_HASUNIQROOT(&coef[0], &coef[4]);
-  } catch (modelExceptions &e) {
-    std::cout << e.what() << std::endl;
-    throw modelExceptions(
-        "Peng_Robinson::setTemperature calculation error #1");
+double Peng_Robinson::GetVolume(double p, double t) const {
+  if (!is_above0(p, t)) {
+    set_error_code(ERR_CALCULATE | ERR_CALC_MODEL);
+    return 0.0;
   }
-  if ((coef[4] <= 0.0) || (!std::isfinite(coef[4])))
-    throw modelExceptions(
-        "Peng_Robinson::setTemperature calculation error #2");
+  double alf = std::pow(1.0 + modelCoefK_*(1.0 -
+      t / parameters_->cgetT_K()), 2.0);
+  std::vector<double> coef {
+      1.0,
+      modelCoefB_ - parameters_->cgetR()*t/p,
+      (modelCoefA_*alf - 2.0f * modelCoefB_ *
+          parameters_->cgetR()*t)/p-3.0f*modelCoefB_*modelCoefB_,
+      std::pow(modelCoefB_, 3.0f) + (parameters_->cgetR()*
+          t *modelCoefB_*modelCoefB_ - modelCoefA_ * alf *modelCoefB_)/p,
+      0.0, 0.0, 0.0};
+  CardanoMethod_HASUNIQROOT(&coef[0], &coef[4]);
+#ifdef _DEBUG
+  if (!is_above0(coef[4])) {
+    set_error_code(ERR_CALCULATE | ERR_CALC_MODEL);
+    return 0.0;
+  }
+#endif
   return coef[4];
 }
 
-//================================
-// Peng_Robinson::getPressure
-//================================
-
-float real_gas_models::Peng_Robinson::getPressure(float v, float t) const {
-  if ((v <= 0.0) || (t <= 0.0))
-    throw modelExceptions("Peng_Robinson::setPressure bad input v: " +
-        std::to_string(v) + " t: " + std::to_string(t));
-  const float a = std::pow(1.0 + modelCoefK_ * std::pow(1.0 - std::sqrt(
-                                   t / parameters_->cgetT_K()), 2.0), 2.0),
-              temp = parameters_->cgetR()*t/(v-modelCoefB_) - a * modelCoefA_ /
-                              (v*v+2.0*modelCoefB_*v -modelCoefB_*modelCoefB_);
-  if ((temp <= 0.0) || (!std::isfinite(temp)))
-    throw modelExceptions(
-      "Peng_Robinson::setPressure calculation error (m.b. input data is NaN)");
+double Peng_Robinson::GetPressure(double v, double t) const {
+  if (!is_above0(v, t)) {
+    set_error_code(ERR_CALCULATE | ERR_CALC_MODEL);
+    return 0.0;
+  }
+  const double a    = std::pow(1.0 + modelCoefK_ * std::pow(1.0 -
+      std::sqrt(t / parameters_->cgetT_K()), 2.0), 2.0),
+               temp = parameters_->cgetR()*t/(v-modelCoefB_) -
+      a * modelCoefA_ / (v*v+2.0*modelCoefB_*v -modelCoefB_*modelCoefB_);
   return temp;
 }
 
-//================================
-// Peng_Robinson getters
-//================================
-
-float real_gas_models::Peng_Robinson::getCoefA() const {
+double Peng_Robinson::getCoefA() const {
   return modelCoefA_;
 }
 
-float real_gas_models::Peng_Robinson::getCoefB() const {
+double Peng_Robinson::getCoefB() const {
   return modelCoefB_;
 }
 
-float real_gas_models::Peng_Robinson::getCoefK() const {
+double Peng_Robinson::getCoefK() const {
   return modelCoefK_;
 }

@@ -1,40 +1,40 @@
-#ifndef SRC_MODEL_PENG_ROBINSON_H_
-#define SRC_MODEL_PENG_ROBINSON_H_
+#ifndef _CORE__MODELS__MODEL_PENG_ROBINSON_H_
+#define _CORE__MODELS__MODEL_PENG_ROBINSON_H_
+
+#include "gas_parameters/gas_mix_init.h"
+#include "model_general.h"
 
 #include <memory>
 
-#include "model_general.h"
+class Peng_Robinson: public modelGeneral {
+  double modelCoefA_,
+         modelCoefB_,
+         modelCoefK_;
 
-namespace real_gas_models {
-  class Peng_Robinson_equation;
+private:
+  Peng_Robinson(modelName mn, const_parameters cgp,
+      dyn_parameters dgp, binodalpoints bp);
+  // Init gas_mix
+  Peng_Robinson(modelName mn, parameters_mix components,
+      binodalpoints bp);
 
-  //================================
-  // Peng_Robinson
-  //================================
+public:
+  static Peng_Robinson *Init(modelName mn, const_parameters cgp,
+      dyn_parameters dgp, binodalpoints bp);
+  // Init gas_mix
+  static Peng_Robinson *Init(modelName mn, parameters_mix components,
+      binodalpoints bp);
 
-  class Peng_Robinson : public modelGeneral {
-    friend class Peng_Robinson_equation;
+  bool IsValid() const;
+  void DynamicflowAccept(class DerivateFunctor &df);
+  void SetVolume(double p, double t);
+  void SetPressure(double v, double t);
+  double GetVolume(double p, double t)    const;
+  double GetPressure(double v, double t)  const;
 
-  private:
-    float modelCoefA_,
-          modelCoefB_,
-          modelCoefK_;
+  double getCoefA()          const;
+  double getCoefB()          const;
+  double getCoefK()          const;
+};
 
-    Peng_Robinson(modelName mn, std::shared_ptr<constgasparameters> &cgp);
-
-  public:
-    bool isValid() const;
-    void dynamicflowAccept(class DerivateFunctor &df);
-    void setVolume(float p, float t);
-    void setPressure(float v, float t);
-    float getVolume(float p, float t)    const;
-    float getPressure(float v, float t)  const;
-
-    float getCoefA()          const;
-    float getCoefB()          const;
-    float getCoefK()          const;
-  };
-}  // namespace real_gas_models
-
-#endif  // SRC_MODEL_PENG_ROBINSON_H_
-
+#endif  // _CORE__MODELS__MODEL_PENG_ROBINSON_H_

@@ -1,34 +1,31 @@
-#ifndef SRC_MODEL_IDEAL_GAS_H_
-#define SRC_MODEL_IDEAL_GAS_H_
+#ifndef _CORE__MODELS__MODEL_IDEAL_GAS_H_
+#define _CORE__MODELS__MODEL_IDEAL_GAS_H_
 
 #include <memory>
 
 #include "model_general.h"
 
-namespace real_gas_models {
-  class Ideal_gas_equation;
+class IdealGas final: public modelGeneral {
+private:
+  IdealGas(modelName mn, const_parameters cgp,
+      dyn_parameters dgp, binodalpoints bp);
 
-  //================================
-  // idealGas
-  //================================
+protected:
+  void dyn_parameters_update(dyn_parameters &prev,
+      const parameters new_state) override;
 
-  class idealGas : public modelGeneral {
-    friend class Ideal_gas_equation;
+public:
+  static IdealGas *Init(modelName mn, const_parameters cgp,
+      dyn_parameters dgp, binodalpoints bp);
 
-  private:
-    idealGas(modelName mn, std::shared_ptr<constgasparameters> &cgp);
+  bool IsValid() const override;
+  void DynamicflowAccept(DerivateFunctor &df) override;
+//  void setTemperature(double v, double p);
 
-  public:
-    bool isValid() const;
-    void dynamicflowAccept(DerivateFunctor &df);
-    void setTemperature(float v, float p);
+  void SetVolume(double p, double t)      override;
+  void SetPressure(double v, double t)    override;
+  double GetVolume(double p, double t)    const override;
+  double GetPressure(double v, double t)  const override;
+};
 
-    void setVolume(float p, float t);
-    void setPressure(float v, float t);
-    float getVolume(float p, float t)    const;
-    float getPressure(float v, float t)  const;
-  };
-}  // namespace real_gas_models
-
-#endif  // SRC_MODEL_IDEAL_GAS_H_
-
+#endif  // _CORE__MODELS__MODEL_IDEAL_GAS_H_

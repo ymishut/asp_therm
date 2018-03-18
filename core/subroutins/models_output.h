@@ -1,12 +1,8 @@
-#ifndef SRC_MODELS_OUTPUT_H_
-#define SRC_MODELS_OUTPUT_H_
+#ifndef _CORE__SUBROUTINS__MODELS_OUTPUT_H_
+#define _CORE__SUBROUTINS__MODELS_OUTPUT_H_
 
-#include <ostream>
 #include <iomanip>
-
-//================================
-// formatted_output
-//================================
+#include <ostream>
 
 class formatted_output {
 private:
@@ -31,5 +27,4 @@ public:
   }
 };
 
-#endif  // SRC_MODELS_OUTPUT_H_
-
+#endif  // _CORE__SUBROUTINS__MODELS_OUTPUT_H_

@@ -1,38 +1,42 @@
-#ifndef SRC_MODEL_REDLICH_KWONG_H_
-#define SRC_MODEL_REDLICH_KWONG_H_
+#ifndef _CORE_MODELS__MODEL_REDLICH_KWONG_H_
+#define _CORE_MODELS__MODEL_REDLICH_KWONG_H_
+
+#include "gas_parameters/gas_mix_init.h"
+#include "model_general.h"
 
 #include <memory>
 
-#include "model_general.h"
+class Redlich_Kwong2 final: public modelGeneral {
+  double modelCoefA_,
+         modelCoefB_;
 
-namespace real_gas_models {
-  class Redlich_Kwong_equation;
+private:
+  Redlich_Kwong2(modelName mn, const_parameters cgp,
+      dyn_parameters dgp, binodalpoints bp);
+  // Init gas_mix
+  Redlich_Kwong2(modelName mn, parameters_mix components,
+      binodalpoints bp);
 
-  //================================
-  // Redlich_Kwong2
-  //================================
+protected:
+  void dyn_parameters_update(dyn_parameters &prev,
+      const parameters new_state) override;
 
-  class Redlich_Kwong2 :public modelGeneral {
-    friend class Redlich_Kwong_equation;
+public:
+  static Redlich_Kwong2 *Init(modelName mn, const_parameters cgp,
+      dyn_parameters dgp, binodalpoints bp);
+  // Init gas_mix
+  static Redlich_Kwong2 *Init(modelName mn, parameters_mix components,
+      binodalpoints bp);
 
-  private:
-    float modelCoefA_,
-          modelCoefB_;
+  bool IsValid() const;
+  void DynamicflowAccept(class DerivateFunctor &df);
+  void SetVolume(double p, double t);
+  void SetPressure(double v, double t);
+  double GetVolume(double p, double t)    const;
+  double GetPressure(double v, double t)  const;
 
-    Redlich_Kwong2(modelName mn, std::shared_ptr<constgasparameters> &cgp);
+  double getCoefA()   const;
+  double getCoefB()   const;
+};
 
-  public:
-    bool isValid() const;
-    void dynamicflowAccept(class DerivateFunctor &df);
-    void setVolume(float p, float t);
-    void setPressure(float v, float t);
-    float getVolume(float p, float t)    const;
-    float getPressure(float v, float t)  const;
-
-    float getCoefA()   const;
-    float getCoefB()   const;
-  };
-}  // namespace real_gas_models
-
-#endif  // SRC_MODEL_REDLICH_KWONG_H_
-
+#endif  // _CORE_MODELS__MODEL_REDLICH_KWONG_H_

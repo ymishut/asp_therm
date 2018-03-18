@@ -1,79 +1,63 @@
-#ifndef SRC_MODELS_CREATOR_H_
-#define SRC_MODELS_CREATOR_H_
+#ifndef _CORE__MODELS__MODELS_CREATOR_H_
+#define _CORE__MODELS__MODELS_CREATOR_H_
+
+#include "model_general.h"
+#include "model_ideal_gas.h"
+#include "model_redlich_kwong.h"
+#include "model_peng_robinson.h"
+
+
+#include "subroutins/inputdata_by_file.h"
 
 #include <memory>
 
-#include "phase_diagram.h"
+class Equation_of_state {
+public:
+  virtual modelGeneral *GetCalculatingModel(modelName mn,
+      const_parameters cgp, dyn_parameters dgp) = 0;
+  virtual ~Equation_of_state();
+};
 
-namespace real_gas_models {
-  class modelGeneral;
-  class InputData;
-  class balloonFlowDynamic;
-  class gasparameters;
-  struct constgasparameters;
+class Ideal_gas_equation: public Equation_of_state {
+public:
+   modelGeneral *GetCalculatingModel(modelName mn,
+       const_parameters cgp, dyn_parameters dgp);
+};
 
-  //================================
-  // Equation_of_state
-  //================================
+class Redlich_Kwong_equation: public Equation_of_state {
+public:
+   modelGeneral *GetCalculatingModel(modelName mn,
+       const_parameters cgp, dyn_parameters dgp);
+};
 
-  class Equation_of_state {
-  public:
-    virtual modelGeneral *getCalculatingModel(modelName mn,
-                          std::shared_ptr<constgasparameters> &cgp) = 0;
-  };
+class Peng_Robinson_equation: public Equation_of_state {
+public:
+   modelGeneral *GetCalculatingModel(modelName mn,
+       const_parameters cgp, dyn_parameters dgp);
+};
 
-  //================================
-  // Ideal_gas_equation
-  //================================
+// DEVELOP to new file
+/*
+//=========================================================================
+// Dynamic
+//=========================================================================
 
-  class Ideal_gas_equation: public Equation_of_state {
-  protected:
-     modelGeneral *getCalculatingModel(modelName mn,
-                          std::shared_ptr<constgasparameters> &cgp);
-  };
+class GasDynamic {
+public:
+  balloonFlowDynamic *getFlowCalculator(
+      const std::shared_ptr<modelGeneral> &spmg, gasparameters &outballoon,
+                                               const float V, const float F);
 
-  //================================
-  // Redlich_Kwong_equation
-  //================================
+  void calculation(std::shared_ptr<InputData> &idp);
 
-  class Redlich_Kwong_equation: public Equation_of_state {
-  protected:
-     modelGeneral *getCalculatingModel(modelName mn,
-                         std::shared_ptr<constgasparameters> &cgp);
-  };
+private:
+  std::shared_ptr<InputData> idp_;
 
-  //================================
-  // Peng_Robinson_equation
-  //================================
+private:
+  balloonFlowDynamic *setCalculator(std::shared_ptr<modelGeneral> &mg,
+                                   std::shared_ptr<gasparameters> &pgp);
 
-  class Peng_Robinson_equation: public Equation_of_state {
-  protected:
-     modelGeneral *getCalculatingModel(modelName mn,
-                         std::shared_ptr<constgasparameters> &cgp);
-  };
-
-  //================================
-  // GasDynamic
-  //================================
-
-  class GasDynamic {
-  public:
-    balloonFlowDynamic *getFlowCalculator(
-        const std::shared_ptr<modelGeneral> &spmg, gasparameters &outballoon,
-                                                 const float V, const float F);
-
-    void calculation(std::shared_ptr<InputData> &idp);
-
-  private:
-    std::shared_ptr<InputData> idp_;
-
-  private:
-    balloonFlowDynamic *setCalculator(std::shared_ptr<modelGeneral> &mg,
-                                     std::shared_ptr<gasparameters> &pgp);
-
-    std::shared_ptr<Equation_of_state> setEOS();
-  };
-}  // namespace real_gas_models
-
-#endif  // SRC_MODELS_CREATOR_H_
-
+  std::shared_ptr<Equation_of_state> setEOS();
+};
+*/
+#endif  // _CORE__MODELS__MODELS_CREATOR_H_

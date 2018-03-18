@@ -1,150 +1,133 @@
 #include "model_general.h"
-#include "gas_description_dynamic.h"
-#include "gas_description_static.h"
-#include "models_exceptions.h"
 
-//================================
-// modelGeneral ctor
-//================================
+#include "gas_parameters/gas_description_dynamic.h"
+#include "models_errors.h"
 
-real_gas_models::modelGeneral::modelGeneral(modelName mn,
-                  std::shared_ptr<constgasparameters> &cgp)
-  :parameters_(std::unique_ptr<Igasparameters> (
-        new gasparameters(0.0, 0.0, 0.0, cgp))),
+//==================================================================
+// modelGeneral methods
+//==================================================================
+
+modelGeneral::modelGeneral(modelName mn, const_parameters cgp,
+    dyn_parameters dgp,binodalpoints bp)
+  : parameters_(std::unique_ptr<GasParameters> (
+        new GasParameters(0.0, 0.0, 0.0, cgp))),
     phasediag_model_(mn),
-    bp_(phasediagram::getCalculated().getBinodalPoints(cgp->V_K, cgp->P_K,
-                         cgp->T_K, phasediag_model_, cgp->acentricfactor)) {
+    bp_(bp)
+   /* bp_(PhaseDiagram::GetCalculated().GetBinodalPoints(cgp.V_K,
+          cgp.P_K, cgp.T_K, phasediag_model_, cgp.acentricfactor))*/ {
 }
 
-//================================
-// modelGeneral::setParameters
-//================================
+modelGeneral::modelGeneral(modelGeneral mn, parameters_mix components,
+    binodalpoints bp) {
 
-void real_gas_models::modelGeneral::setParameters(float v, float p, float t) {
+}
+
+modelGeneral::~modelGeneral() {}
+
+void modelGeneral::setParameters(double v, double p, double t) {
   parameters_->csetParameters(v, p, t, setState_phase(v, p, t));
 }
 
-//================================
-// modelGeneral::setState_phasesub
-//================================
-
-int real_gas_models::modelGeneral::setState_phasesub(float p) {
-  if (bp_.p.empty())
-    throw modelExceptions("real_gas_models::modelGeneral::setState_phasesub");
+int32_t modelGeneral::setState_phasesub(double p) {
   return (bp_.p.end() - std::find_if(bp_.p.begin() + 1, bp_.p.end(),
-        std::bind2nd(std::less_equal<float>(), p)));
+      std::bind2nd(std::less_equal<double>(), p)));
 }
 
-//================================
-// modelGeneral::setState_phase
-//================================
-
-real_gas_models::state_phase real_gas_models::modelGeneral::setState_phase(
-                                                 float v, float p, float t) {
+state_phase modelGeneral::setState_phase(
+    double v, double p, double t) {
   if (t >= parameters_->cgetT_K())
     return (p >= parameters_->cgetP_K()) ? state_phase::SCF : state_phase::GAS;
-
   // if p on the left of binodal graph  -  liquid
-  int iter = setState_phasesub(p);
+  int32_t iter = setState_phasesub(p);
   if (!iter) {
-      std::cout << " modelGeneral: gas have too low pressure\n";
-      return ((v <= parameters_->cgetV_K()) ?
-          state_phase::LIQ_STEAM : state_phase::GAS);
-    }
+    // std::cerr << " modelGeneral: gas have too low pressure\n";
+    return ((v <= parameters_->cgetV_K()) ?
+        state_phase::LIQ_STEAM : state_phase::GAS);
+  }
   iter = bp_.p.size() - iter - 1;
-  const float p_path = (p-bp_.p[iter+1]) / (bp_.p[iter]-bp_.p[iter+1]);   // %
+  const double p_path = (p-bp_.p[iter+1]) / (bp_.p[iter]-bp_.p[iter+1]); // %
   // left branch of binodal
   if (v < parameters_->cgetV_K()) {                 
-      const float vapprox = bp_.vLeft[iter] - (bp_.vLeft[iter+1] -
-          bp_.vLeft[iter]) * p_path;
-      return ((v < vapprox) ? state_phase::LIQUID : state_phase::LIQ_STEAM);
-    }
-  const float vapprox = bp_.vRigth[iter] + (bp_.vRigth[iter+1] -
-        bp_.vRigth[iter])*p_path;
+    const double vapprox = bp_.vLeft[iter] - (bp_.vLeft[iter+1] -
+        bp_.vLeft[iter]) * p_path;
+    return ((v < vapprox) ? state_phase::LIQUID : state_phase::LIQ_STEAM);
+  }
+  const double vapprox = bp_.vRigth[iter] + (bp_.vRigth[iter+1] -
+      bp_.vRigth[iter])*p_path;
   return ((v > vapprox) ? state_phase::GAS : state_phase::LIQ_STEAM);
 }
 
-//================================
-// modelGeneral    getters
-//================================
-
-float real_gas_models::modelGeneral::getVolume() const {
+double modelGeneral::GetVolume() const {
   return parameters_->cgetVolume();
 }
 
-float real_gas_models::modelGeneral::getPressure() const {
+double modelGeneral::GetPressure() const {
   return parameters_->cgetPressure();
 }
 
-float real_gas_models::modelGeneral::getTemperature() const {
+double modelGeneral::GetTemperature() const {
   return parameters_->cgetTemperature();
 }
 
-float real_gas_models::modelGeneral::getCV() const {
+double modelGeneral::GetCV() const {
   return parameters_->cgetCV();
 }
 
-float real_gas_models::modelGeneral::getAcentric() const {
+double modelGeneral::GetAcentric() const {
   return parameters_->cgetAcentricFactor();
 }
 
-float real_gas_models::modelGeneral::getAdiabatic() const {
+double modelGeneral::GetAdiabatic() const {
   return parameters_->cgetAdiabatic();
 }
 
-float real_gas_models::modelGeneral::getT_K() const {
+double modelGeneral::GetT_K() const {
   return parameters_->cgetT_K();
 }
 
-real_gas_models::state_phase real_gas_models::modelGeneral::getState() const {
+state_phase modelGeneral::GetState() const {
   return parameters_->cgetState();
 }
 
-real_gas_models::parameters real_gas_models::modelGeneral::getParametersCopy() const {
+parameters modelGeneral::GetParametersCopy() const {
   return parameters_->cgetParameters();
 }
 
-std::shared_ptr<real_gas_models::constgasparameters> real_gas_models::modelGeneral::getConstParameters() const {
+const_parameters modelGeneral::GetConstParameters() const {
   return parameters_->cgetConstparameters();
 }
 
-//================================
-// modelGeneral::setDynamicParameters
-//================================
+void modelGeneral::setDynamicParameters() {
+  // DEVELOP
+  // делаем лишнюю копию параметров,хотя можно бы было хранить
+  //   указатели на эти структуры, но 1) при расчётах лучше дергать
+  //   данные со стака,               2) эти переходы не частые
+  std::unique_ptr<GasParameters> temp(
+      new GasParameters_dyn(parameters_->cgetParameters(),
+      parameters_->cgetConstParameters(), parameters_->cgetDynParameters(),
+      &dyn_parameters_update);
+     // params_update_f_));
 
-void real_gas_models::modelGeneral::setDynamicParameters() {
-  std::unique_ptr<Igasparameters> temp(new gasparameters_dynamic(getParametersCopy(), getConstParameters()));
   temp.swap(parameters_);
 }
 
-//================================
-// modelGeneral::setStaticParameters
-//================================
-
-void real_gas_models::modelGeneral::setStaticParameters() {
-  Igasparameters *ptr;
-  try {
-    ptr = new gasparameters(getParametersCopy(), getConstParameters());
-  } catch(std::exception &) {
-    ptr = nullptr;
-  }
-  std::unique_ptr<Igasparameters> temp(ptr);
+void modelGeneral::setStaticParameters() {
+  std::unique_ptr<GasParameters> temp(
+      new GasParameters(parameters_->cgetParameters(),
+      parameters_->cgetConstParameters(),
+      parameters_->cgetDynParameters()));
   temp.swap(parameters_);
 }
 
-//================================
-// gasparametersConverter ctor
-//================================
+//==================================================================
+// GasParametersConverter
+//==================================================================
 
-real_gas_models::gasparametersConverter::gasparametersConverter(modelGeneral *md)
-  :md_(md) {
+gasparametersConverter::gasparametersConverter(modelGeneral *md)
+  : md_(md) {
   md_->setDynamicParameters();
 }
 
-//================================
-// gasparametersConverter dtor
-//================================
-
-real_gas_models::gasparametersConverter::~gasparametersConverter() {
+gasparametersConverter::~gasparametersConverter() {
   md_->setStaticParameters();
 }
