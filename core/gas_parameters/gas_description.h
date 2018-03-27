@@ -30,7 +30,8 @@
  *   4) Напишите это сами.
  *
  *
- *   UPD: комментарий с меткой "DEVELOP" предложение к разработчику
+ *   UPD:  комментарий с меткой "DEVELOP" предложение к разработчику
+ *   UPD2: комментировать можно даже комментарии и это прелестно
 */
 
 /*
@@ -80,8 +81,9 @@ struct parameters {
 ///     Инит методы обеспечат корректное создание, а далее
 ///     изменение полей возлагается на методы мспользуемой модели
 struct dyn_parameters {
-  double adiabatic_index,
-         heat_cap_vol,     // heat capacity for volume = const // Cv
+ // adiabatic_index,  // Cp/Cv
+  double heat_cap_vol,     // heat capacity for volume = const // Cv
+         heat_cap_pres,    // heat capacity for pressure = const // Cp
          interval_energy,  //
          beta_kr;          // beta_kr=beta_kr(adiabatic_index)
                            //   = [0.0, ... ,1.0]
@@ -96,10 +98,10 @@ struct dyn_parameters {
 private:
   // закроем все конструкторы
   // close all constructors
-  dyn_parameters(double ai, double cv, parameters pm);
+  dyn_parameters(double cv, double cp, parameters pm);
 
 public:
-  static dyn_parameters *Init(double ai, double cv, parameters pm);
+  static dyn_parameters *Init(double cv, double cp, parameters pm);
 //  void Update();
 };
 
@@ -157,7 +159,7 @@ public:
 // ================================================================
 /// Функции проверки валидности данных
 bool is_valid_cgp(const const_parameters &cgp);
-bool is_valid_dgp(const cdyn_parameters &dgp);
+bool is_valid_dgp(const dyn_parameters &dgp);
 
 
 //================================

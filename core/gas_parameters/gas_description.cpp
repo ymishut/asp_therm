@@ -6,22 +6,22 @@
 //=========================================================================
 // dyn_parameters
 //=========================================================================
-dyn_parameters::dyn_parameters(double ai, double cv, parameters pm)
-  : adiabatic_index(ai), heat_cap_vol(cv), beta_kr(0.0), parm(pm) {
+dyn_parameters::dyn_parameters(double cp, double cv, parameters pm)
+  : heat_cap_vol(cv), heat_cap_pres(cp), beta_kr(0.0), parm(pm) {
+  double ai = cp / cv;
   beta_kr = std::pow(2.0 / (ai + 1.0), ai / (ai - 1.0));
 }
 
-dyn_parameters *dyn_parameters::Init(double ai, double cv, parameters pm) {
+dyn_parameters *dyn_parameters::Init(double cp, double cv, parameters pm) {
   // проверка входных данных
   // check input data:
   //  --  больше нуля     --  > 0.0
   //  --  конечны         --  finite
-  bool correct_input = (ai != 1.0);
-  correct_input &= is_above0(ai, cv);
+  bool correct_input = is_above0(cp, cv);
   correct_input &= is_above0(pm.pressure, pm.temperature, pm.volume);
   if (!correct_input)
     return nullptr;
-  return new dyn_parameters(ai, cv, pm);
+  return new dyn_parameters(cp, cv, pm);
 }
 
 //=========================================================================
@@ -60,7 +60,7 @@ const_parameters
 // ================================================================
 bool is_valid_cgp(const const_parameters &cgp) {
   if (!is_above0(cgp.acentricfactor, cgp.molecularmass,
-      cgp.P_K, cgp.R, cgp.T_K,cgp.V_K)) {
+      cgp.P_K, cgp.R, cgp.T_K, cgp.V_K)) {
     set_error_code(ERR_INIT | ERR_INIT_ZERO);
     return false;
   }
@@ -68,7 +68,7 @@ bool is_valid_cgp(const const_parameters &cgp) {
 }
 
 bool is_valid_dgp(const dyn_parameters &dgp) {
-  if (!is_above0(dgp.adiabatic_index, dgp.beta_kr,
+  if (!is_above0(dgp.heat_cap_pres, dgp.beta_kr,
       dgp.heat_cap_vol)) {
     set_error_code(ERR_INIT | ERR_INIT_ZERO);
     return false;

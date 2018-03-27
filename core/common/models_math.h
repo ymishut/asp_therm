@@ -10,12 +10,10 @@
 
 #include <assert.h>
 
-// проверка чисел с плавающей точкой
-// check floating variable
-//  > 0
-inline bool is_above0(double a) {
-  return (a > 0.0 && std::isfinite(a));
-}
+
+bool is_equal(double a, double b, double accur);
+bool is_above0(double a);
+
 /// DEVELOP
 ///   думаю можно понадобности и для других типов перегрузить
 

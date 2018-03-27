@@ -2,9 +2,9 @@
 #define _CORE__GAS_PARAMETERS__GAS_DESCRIPTION_STATIC_H_
 
 #include "gas_description.h"
-#include "gas_mix_init.h"
 
 #include <iostream>
+#include <memory>
 
 /*
  * PARAMETERS OF GAS IN STATIC.
@@ -22,13 +22,16 @@ protected:
   // dyn_parameters содержат несколько важных полей
   dyn_parameters  dyn_parameters_;
 
-public:
+protected:
   GasParameters(double v, double p, double t,
       const const_parameters cgp, dyn_parameters dgp);
   GasParameters(parameters prs,
       const const_parameters cgp, dyn_parameters dgp);
   // for gas mix
-  GasParameters(parameters prs, parameters_mix components);
+
+public:
+  static GasParameters *Init(parameters prs,
+      const const_parameters cgp, dyn_parameters dgp);
 
   double cgetV_K()            const;
   double cgetP_K()            const;
@@ -48,7 +51,7 @@ public:
   double cgetCV()         const;
   double cgetBeta()       const;
 
-  virtual void csetParameters(double v, double p, double t, state_phase);
+  virtual void csetParameters(double v, double p, double t, state_phase sp);
 
   virtual ~GasParameters();
 

@@ -22,14 +22,14 @@
 class GasParameters_dyn final: public GasParameters {
 public:
   GasParameters_dyn(double v, double p, double t,
-      const_parameters cgp, dyn_parameters dgp,  dyn_params_update update_f);
+      const_parameters cgp, dyn_parameters dgp, dyn_params_update update_f);
   GasParameters_dyn(parameters prs,
       const_parameters cgp, dyn_parameters dgp, dyn_params_update update_f);
   GasParameters_dyn(const_parameters cgp, dyn_parameters dgp,
       dyn_params_update update_f);
 
   void csetParameters(double v,
-      double p, double t, state_phase) override;
+      double p, double t, state_phase sp) override;
 
 private:
   // previous pressure, volume and temperature

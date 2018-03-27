@@ -1,20 +1,30 @@
 #include "gas_description_static.h"
 
+#include "models_math.h"
+
+#include <array>
+
+#include <assert.h>
+//==================================================================
+// protected constructors
+//==================================================================
+
 GasParameters::GasParameters(double v, double p, double t,
     const const_parameters cgp, dyn_parameters dgp)
   : vpte_(parameters{v, p, t}), const_parameters_(cgp),
-    dyn_parameters_(dgp){}
+    dyn_parameters_(dgp) {}
 
 GasParameters::GasParameters(parameters prs,
     const_parameters cgp, dyn_parameters dgp)
-  : vpte_(prs), const_parameters_(cgp), dyn_parameters_(dpg) {}
+  : vpte_(prs), const_parameters_(cgp), dyn_parameters_(dgp) {}
 
-GasParameters::GasParameters(parameters prs,
-    parameters_mix components)
-  : vpte_(prs) {
-  for (auto const &x : components) {
+//==================================================================
+// static Init methods
+//==================================================================
 
-  }
+GasParameters *GasParameters::Init(parameters prs,
+    const const_parameters cgp, dyn_parameters dgp) {
+  assert(0);
 }
 
 GasParameters::~GasParameters() {}
@@ -58,7 +68,7 @@ double GasParameters::cgetAcentricFactor() const {
 // dyn_gasparametrs fields
 //==================================================================
 double GasParameters::cgetAdiabatic() const {
-  return dyn_parameters_.adiabatic_index;
+  return dyn_parameters_.heat_cap_pres / dyn_parameters_.heat_cap_vol;
 }
 
 double GasParameters::cgetCV() const {
