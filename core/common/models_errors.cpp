@@ -68,7 +68,7 @@ static char *get_custom_err_msg() {
   if (list_of_custom_msg != NULL) {
     // если ошибка касается смесей газов
     if (ERR_MASK_GAS_MIX & err_tmp) {
-      char mix_err_msg[ERR_MSG_MAX_LEN] = "gas mix: ";
+      char *mix_err_msg = "gas mix: ";
       strcat(mix_err_msg, list_of_custom_msg[err_concrete]);
       return mix_err_msg;
     } else {

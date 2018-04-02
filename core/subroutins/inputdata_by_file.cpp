@@ -16,7 +16,7 @@ namespace {
                  IN_OUT_BALLOON = 6;
 }  // namespace
 
-InputData::InputData(const std::__cxx11::string &filename)
+InputData::InputData(const std::string &filename)
   : infile_(filename, std::ios_base::in) {
   if (!infile_.is_open())
     set_error_code(ERR_FILEIO);

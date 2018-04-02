@@ -7,6 +7,7 @@ set(
   gas_description.cpp
   gas_description_dynamic.cpp
   gas_description_static.cpp
+  gas_dynamic_update.cpp
   gas_mix_init.cpp
 )
 

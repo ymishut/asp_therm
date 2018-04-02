@@ -3,7 +3,6 @@
 #include "inputdata_by_file.h"
 #include "file_reading.h"
 #include "models_math.h"
-#include "models_exceptions.h"
 
 #include <boost/lexical_cast.hpp>
 

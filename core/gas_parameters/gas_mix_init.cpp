@@ -92,7 +92,7 @@ GasParameters_mix_dyn *GasParameters_mix_dyn::Init(
   // init gasmix dyn_parameters
   // создадим временную копию динамических параметров
   //   которую потом пересчитаем к prs
-  std::vector<std::pair<double, dyn_parameters>> dgp_cpt();
+  std::vector<std::pair<double, dyn_parameters>> dgp_cpt;
   for (auto const &x : components) {
     dgp_cpt.push_back({x.first, x.second.second});
     update_f(dgp_cpt.back().second, prs);

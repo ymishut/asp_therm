@@ -1,9 +1,10 @@
-#ifndef _CORE_MODELS__MODEL_GENERAL_H_
-#define _CORE_MODELS__MODEL_GENERAL_H_
+#ifndef _CORE__MODELS__MODEL_GENERAL_H_
+#define _CORE__MODELS__MODEL_GENERAL_H_
 
-#include "gas_parameters/gas_description_static.h"
-#include "gas_parameters/gas_mix_init.h"
-#include "phase_diagram/phase_diagram.h"
+#include "gas_description.h"
+#include "gas_description_static.h"
+#include "gas_mix_init.h"
+#include "phase_diagram.h"
 
 #include <boost/noncopyable.hpp>
 
@@ -55,7 +56,7 @@ protected:
       dyn_parameters dgp, binodalpoints bp);
 
   modelGeneral(modelName mn, parameters_mix components,
-      binodalpoints bp);
+      binodalpoints bp, dyn_parameters_update update_f);
 
   state_phase setState_phase(double v, double p, double t);
   int32_t  setState_phasesub(double p);
@@ -65,7 +66,7 @@ protected:
 
   /// Функция обновления динамических параметров
   /// Update dynn_parameters function
-  virtual void dyn_parameters_update(dyn_parameters &prev_state,
+  virtual void update_dyn_params(dyn_parameters &prev_state,
       const parameters new_state) = 0;
 
 public:
@@ -102,4 +103,4 @@ public:
   ~gasparametersConverter();
 };
 
-#endif  // _CORE_MODELS__MODEL_GENERAL_H_
+#endif  // _CORE__MODELS__MODEL_GENERAL_H_

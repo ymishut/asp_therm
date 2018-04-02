@@ -1,14 +1,15 @@
 #include "model_general.h"
 
-#include "gas_parameters/gas_description_dynamic.h"
+#include "gas_description_dynamic.h"
 #include "models_errors.h"
+
 
 //==================================================================
 // modelGeneral methods
 //==================================================================
-
+/// Одноэлементный газ
 modelGeneral::modelGeneral(modelName mn, const_parameters cgp,
-    dyn_parameters dgp,binodalpoints bp)
+    dyn_parameters dgp, binodalpoints bp)
   : parameters_(std::unique_ptr<GasParameters> (
         new GasParameters(0.0, 0.0, 0.0, cgp))),
     phasediag_model_(mn),
@@ -18,7 +19,9 @@ modelGeneral::modelGeneral(modelName mn, const_parameters cgp,
 }
 
 modelGeneral::modelGeneral(modelGeneral mn, parameters_mix components,
-    binodalpoints bp) {
+    binodalpoints bp)
+  : parameters_(std::unique_ptr<GasParameters>(
+        new GasParameters_mix_dyn)) {
 
 }
 
