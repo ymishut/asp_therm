@@ -9,6 +9,7 @@ set(
   gas_description_static.cpp
   gas_dynamic_update.cpp
   gas_mix_init.cpp
+  init_by_file.cpp
 )
 
 add_library(parameters_lib ${PARAMETERS_SRC})

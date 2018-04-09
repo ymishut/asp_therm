@@ -18,6 +18,10 @@ private:
   Peng_Robinson(modelName mn, parameters_mix components,
       binodalpoints bp);
 
+  double internal_energy_integral(const parameters state);
+  double heat_capac_vol_integral(const parameters state);
+  double heat_capac_prs_integral(const parameters state);
+
 public:
   static Peng_Robinson *Init(modelName mn, const_parameters cgp,
       dyn_parameters dgp, binodalpoints bp);

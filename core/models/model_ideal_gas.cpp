@@ -24,8 +24,7 @@ IdealGas *IdealGas::Init(modelName mn, const_parameters cgp,
 // For ideal gas heat capacity is const
 void dyn_parameters_update(dyn_parameters &prev,
     const parameters new_state) {
-  (void) prev;
-  (void) new_state;
+  prev.parm = new_state;
 }
 
 // visitor

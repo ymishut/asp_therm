@@ -3,7 +3,10 @@
 #include "models_math.h"
 #include "models_errors.h"
 
-#include <iostream>
+#include <cmath>
+// #include <iostream>
+
+#include <assert.h>
 
 Redlich_Kwong2::Redlich_Kwong2(modelName mn, const_parameters cgp,
     dyn_parameters dgp, binodalpoints bp)
@@ -15,7 +18,32 @@ Redlich_Kwong2::Redlich_Kwong2(modelName mn, const_parameters cgp,
 }
 
 Redlich_Kwong2::Redlich_Kwong2(modelName mn, parameters_mix components,
-    binodalpoints bp) {}
+    binodalpoints bp) {
+  assert(0);
+}
+
+//   integral
+double Redlich_Kwong2::internal_energy_integral(const parameters state) {
+  assert(0);
+  // вынесем разницу логарифмов
+  double log_differ = std::log(1);
+}
+
+double Redlich_Kwong2::heat_capac_vol_integral(const parameters state) {
+  assert(0);
+}
+
+double Redlich_Kwong2::heat_capac_prs_integral(const parameters state) {
+  assert(0);
+}
+
+void Redlich_Kwong2::update_dyn_params(dyn_parameters &prev_state,
+    const parameters new_state) {
+  assert(0);
+  parameters prev_parm = prev_state.parm;
+// переменная для разности логарифмов
+  prev_state.parm = new_state;
+}
 
 Redlich_Kwong2 *Redlich_Kwong2::Init(modelName mn, const_parameters cgp,
     dyn_parameters dgp, binodalpoints bp) {

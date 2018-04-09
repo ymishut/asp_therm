@@ -7,6 +7,7 @@ set(
   common.h
   models_errors.cpp
   models_math.cpp
+  xml_reader.cpp
 )
 
 add_library(common_lib ${COMMON_SRC})

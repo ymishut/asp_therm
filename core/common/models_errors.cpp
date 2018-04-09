@@ -65,16 +65,8 @@ static char *get_custom_err_msg() {
     default:
       break;
   }
-  if (list_of_custom_msg != NULL) {
-    // если ошибка касается смесей газов
-    if (ERR_MASK_GAS_MIX & err_tmp) {
-      char *mix_err_msg = "gas mix: ";
-      strcat(mix_err_msg, list_of_custom_msg[err_concrete]);
-      return mix_err_msg;
-    } else {
-      return list_of_custom_msg[err_concrete];
-    }
-  }
+  if (list_of_custom_msg != NULL)
+    return list_of_custom_msg[err_concrete];
   return NULL;
 }
 
@@ -123,5 +115,12 @@ char *get_error_message() {
     return err_msg;
   // вернем стандартное сообщение если не установлено другого
   char *custom_err_msg = get_custom_err_msg();
-  return (custom_err_msg != NULL) ? custom_err_msg : NULL;
+  if (!custom_err_msg)
+    return NULL;
+  if (ERR_MASK_GAS_MIX & err_tmp) {
+    strcpy(err_msg, "gasmix: ");
+    strcat(err_msg, custom_err_msg);
+    return err_msg;
+  }
+  return custom_err_msg;
 }

@@ -29,10 +29,12 @@ protected:
       const const_parameters cgp, dyn_parameters dgp);
   // for gas mix
 
-public:
   static GasParameters *Init(parameters prs,
       const const_parameters cgp, dyn_parameters dgp);
 
+  virtual ~GasParameters();
+
+public:
   double cgetV_K()            const;
   double cgetP_K()            const;
   double cgetT_K()            const;
@@ -53,9 +55,6 @@ public:
 
   virtual void csetParameters(double v, double p, double t, state_phase sp);
 
-  virtual ~GasParameters();
-
-private:
 };
 
 std::ostream& operator<< (std::ostream &outstream, const GasParameters &gp);

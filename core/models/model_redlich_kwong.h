@@ -18,9 +18,13 @@ private:
       binodalpoints bp);
 
 protected:
-  void dyn_parameters_update(dyn_parameters &prev,
+  void update_dyn_params(dyn_parameters &prev_state,
       const parameters new_state) override;
 
+// integrals for calculating u, cv and cv
+  double internal_energy_integral(const parameters state);
+  double heat_capac_vol_integral(const parameters state);
+  double heat_capac_prs_integral(const parameters state);
 public:
   static Redlich_Kwong2 *Init(modelName mn, const_parameters cgp,
       dyn_parameters dgp, binodalpoints bp);

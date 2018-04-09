@@ -10,8 +10,7 @@ private:
   IdealGas(modelName mn, const_parameters cgp,
       dyn_parameters dgp, binodalpoints bp);
 
-protected:
-  void dyn_parameters_update(dyn_parameters &prev,
+  void update_dyn_params(dyn_parameters &prev_state,
       const parameters new_state) override;
 
 public:

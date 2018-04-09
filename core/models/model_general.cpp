@@ -10,20 +10,18 @@
 /// Одноэлементный газ
 modelGeneral::modelGeneral(modelName mn, const_parameters cgp,
     dyn_parameters dgp, binodalpoints bp)
-  : parameters_(std::unique_ptr<GasParameters> (
-        new GasParameters(0.0, 0.0, 0.0, cgp))),
-    phasediag_model_(mn),
-    bp_(bp)
+  : parameters_(std::unique_ptr<GasParameters>(
+        GasParameters::Init({0.0, 0.0, 0.0}, cgp, dgp))),
+    phasediag_model_(mn), bp_(bp)
    /* bp_(PhaseDiagram::GetCalculated().GetBinodalPoints(cgp.V_K,
           cgp.P_K, cgp.T_K, phasediag_model_, cgp.acentricfactor))*/ {
 }
 
-modelGeneral::modelGeneral(modelGeneral mn, parameters_mix components,
+modelGeneral::modelGeneral(modelName mn, parameters_mix components,
     binodalpoints bp)
   : parameters_(std::unique_ptr<GasParameters>(
-        new GasParameters_mix_dyn)) {
-
-}
+        GasParameters_mix::Init({0.0, 0.0, 0.0}, components))),
+    phasediag_model_(mn), bp_(bp) {}
 
 modelGeneral::~modelGeneral() {}
 

@@ -56,7 +56,7 @@ protected:
       dyn_parameters dgp, binodalpoints bp);
 
   modelGeneral(modelName mn, parameters_mix components,
-      binodalpoints bp, dyn_parameters_update update_f);
+      binodalpoints bp, dyn_params_update update_f);
 
   state_phase setState_phase(double v, double p, double t);
   int32_t  setState_phasesub(double p);
@@ -64,6 +64,8 @@ protected:
   void setDynamicParameters();
   void setStaticParameters();
 
+//  virtual double internal_energy_integral(
+//      const parameters state) = 0;
   /// Функция обновления динамических параметров
   /// Update dynn_parameters function
   virtual void update_dyn_params(dyn_parameters &prev_state,
