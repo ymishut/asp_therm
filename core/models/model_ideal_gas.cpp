@@ -5,11 +5,16 @@
 
 #include <cmath>
 
-IdealGas::IdealGas(modelName mn, const_parameters cgp,
+IdealGas::IdealGas(modelName mn, parameters prs, const_parameters cgp,
     dyn_parameters dgp, binodalpoints bp)
-  : modelGeneral::modelGeneral(mn, cgp, dgp, bp) {}
+  : modelGeneral::modelGeneral(mn, prs, cgp, dgp, bp) {}
 
-IdealGas *IdealGas::Init(modelName mn, const_parameters cgp,
+IdealGas::IdealGas(modelName mn, parameters prs, parameters_mix components,
+    binodalpoints bp)
+  : modelGeneral::modelGeneral(mn, prs, components, bp) {}
+
+IdealGas *IdealGas::Init(modelName mn, parameters prs,
+    const_parameters cgp,
     dyn_parameters dgp, binodalpoints bp) {
   // check const_parameters
   if (!is_above0(cgp.acentricfactor, cgp.molecularmass,
@@ -17,7 +22,30 @@ IdealGas *IdealGas::Init(modelName mn, const_parameters cgp,
     set_error_code(ERR_INIT | ERR_INIT_ZERO);
     return nullptr;
   }
-  return new IdealGas(mn, cgp, dgp, bp);
+  IdealGas *tmp = new IdealGas(mn, prs, cgp, dgp, bp);
+  if (tmp == nullptr)
+    return nullptr;
+  if (tmp->getGasParameters == nullptr) {
+    delete tmp;
+    return nullptr;
+  }
+  return tmp;
+}
+
+IdealGas *IdealGas::Init(modelName mn, parameters prs,
+    parameters_mix components,
+    binodalpoints bp) {
+  // check const_parameters
+  if (components.empty())
+    return nullptr;
+  IdealGas *tmp = new IdealGas(mn, prs, components, bp);
+  if (tmp == nullptr)
+    return nullptr;
+  if (tmp->getGasParameters == nullptr) {
+    delete tmp;
+    return nullptr;
+  }
+  return tmp;
 }
 
 // Для идеального газа теплоёмкость газа постоянна

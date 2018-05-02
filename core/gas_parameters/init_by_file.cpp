@@ -4,10 +4,12 @@
 
 GasParameters *InitGasParameters::InitGasParameters(
     const std::string &file) {
-
+  assert(0);
+  return NULL;
 }
 
 std::vector<GasParameters *> InitGasParameters::InitGasParameters(
     const std::vector<std::string> *files) {
-
+  assert(0);
+  return NULL;
 }

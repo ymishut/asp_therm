@@ -1,6 +1,7 @@
 #include "gas_mix_init.h"
 
 #include "models_errors.h"
+#include "model_general.h"
 
 #include <cmath>
 #include <vector>
@@ -99,19 +100,19 @@ GasParameters_mix *GasParameters_mix::Init(parameters prs,
       components.begin()->first * avr_dyn.heat_cap_vol,
       components.begin()->first * avr_dyn.heat_cap_pres,
   };
-  for (auto i = ++components.begin(); i !=components.end(); ++i) {
+ // for (auto i = ++components.begin(); i !=components.end(); ++i) {
    // dgp_tmp[0] += x.first * x.second.heat_cap_vol;
    // dgp_tmp[1] += x.first * x.second.heat_cap_pres;
-  }
+ // }
 }
 // =========================================================
 // GasParameters_mix_dyn methods
 // =========================================================
 GasParameters_mix_dyn::GasParameters_mix_dyn(parameters prs,
     const_parameters cgp, dyn_parameters dgp, parameters_mix components,
-    dyn_params_update update_f)
-  : GasParameters_mix(prs, cgp, dgp, components),
-    update_f_(update_f) {}
+    modelGeneral *mg)
+  : GasParameters_mix(prs, cgp, dgp, components), model_(mg) {}
+   // update_f_(&modelGeneral::update_dyn_params) {}
   // DEVELOP
   //   23_03_2018
   /*   В общем, после долгих раздумий решено:
@@ -127,8 +128,8 @@ GasParameters_mix_dyn::GasParameters_mix_dyn(parameters prs,
    *          и ладно, его использование ограничено
    */
 GasParameters_mix_dyn *GasParameters_mix_dyn::Init(
-    parameters prs, parameters_mix components, dyn_params_update update_f) {
-  if (components.empty() || update_f == nullptr) {
+    parameters prs, parameters_mix components, modelGeneral *mg) {
+  if (components.empty() || mg == nullptr) {
     set_error_code(ERR_INIT | ERR_INIT_NULLP | ERR_GAS_MIX);
     return nullptr;
   }
@@ -154,7 +155,7 @@ GasParameters_mix_dyn *GasParameters_mix_dyn::Init(
   std::vector<std::pair<double, dyn_parameters>> dgp_cpt;
   for (auto const &x : components) {
     dgp_cpt.push_back({x.first, x.second.second});
-    update_f(dgp_cpt.back().second, prs);
+    mg->update_dyn_params(dgp_cpt.back().second, prs);
   }
   std::array<double, 2> dgp_tmp = {0.0, 0.0};// 0.0, 0.0};
   for (auto const &x : dgp_cpt) {
@@ -166,8 +167,12 @@ GasParameters_mix_dyn *GasParameters_mix_dyn::Init(
   }
   std::unique_ptr<dyn_parameters> tmp_dgp(dyn_parameters::Init(
       dgp_tmp[0], dgp_tmp[1], prs));
+  if (tmp_dgp == nullptr) {
+    set_error_code(ERR_INIT | ERR_GAS_MIX | ERR_CALC_GAS_P);
+    return nullptr;
+  }
   return new GasParameters_mix_dyn(prs, *tmp_cgp, *tmp_dgp,
-      components, update_f);
+      components, mg);
 }
 
  void GasParameters_mix_dyn::csetParameters(double v, double p, double t,
@@ -179,17 +184,17 @@ GasParameters_mix_dyn *GasParameters_mix_dyn::Init(
   sph_ = sp;
   // std::vector<dyn_parameters> dgp_cpt(components_.size());
   for (auto &x : components_)
-    update_f_(x.second.second, vpte_);
-  dyn_parameters_.heat_cap_vol  = 0.0;
-  dyn_parameters_.heat_cap_pres = 0.0;
-  dyn_parameters_.interval_energy = 0.0;
-  dyn_parameters_.beta_kr = 0.0;
-  dyn_parameters_.parm = vpte_;
+    model_->update_dyn_params(x.second.second, vpte_);
+  dyn_params_.heat_cap_vol  = 0.0;
+  dyn_params_.heat_cap_pres = 0.0;
+  dyn_params_.interval_energy = 0.0;
+  dyn_params_.beta_kr = 0.0;
+  dyn_params_.parm = vpte_;
   for (auto const &x : components_) {
-    dyn_parameters_.heat_cap_vol  += x.first * x.second.second.heat_cap_vol;
-    dyn_parameters_.heat_cap_pres += x.first * x.second.second.heat_cap_pres;
-    dyn_parameters_.interval_energy +=
+    dyn_params_.heat_cap_vol  += x.first * x.second.second.heat_cap_vol;
+    dyn_params_.heat_cap_pres += x.first * x.second.second.heat_cap_pres;
+    dyn_params_.interval_energy +=
         x.first * x.second.second.interval_energy;
-    dyn_parameters_.beta_kr += x.first * x.second.second.beta_kr;
+    dyn_params_.beta_kr += x.first * x.second.second.beta_kr;
   }
 }

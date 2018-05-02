@@ -1,26 +1,28 @@
 #include "model_general.h"
 
 #include "gas_description_dynamic.h"
+#include "gas_mix_init.h"
 #include "models_errors.h"
 
+#include <algorithm>
 
 //==================================================================
 // modelGeneral methods
 //==================================================================
 /// Одноэлементный газ
-modelGeneral::modelGeneral(modelName mn, const_parameters cgp,
-    dyn_parameters dgp, binodalpoints bp)
+modelGeneral::modelGeneral(modelName mn, parameters prs,
+    const_parameters cgp, dyn_parameters dgp, binodalpoints bp)
   : parameters_(std::unique_ptr<GasParameters>(
-        GasParameters::Init({0.0, 0.0, 0.0}, cgp, dgp))),
+        GasParameters_dyn::Init(prs, cgp, dgp, this))),
     phasediag_model_(mn), bp_(bp)
    /* bp_(PhaseDiagram::GetCalculated().GetBinodalPoints(cgp.V_K,
           cgp.P_K, cgp.T_K, phasediag_model_, cgp.acentricfactor))*/ {
 }
 
-modelGeneral::modelGeneral(modelName mn, parameters_mix components,
+modelGeneral::modelGeneral(modelName mn, parameters prs, parameters_mix components,
     binodalpoints bp)
   : parameters_(std::unique_ptr<GasParameters>(
-        GasParameters_mix::Init({0.0, 0.0, 0.0}, components))),
+        GasParameters_mix_dyn::Init(prs, components, this))),
     phasediag_model_(mn), bp_(bp) {}
 
 modelGeneral::~modelGeneral() {}
@@ -56,6 +58,10 @@ state_phase modelGeneral::setState_phase(
   const double vapprox = bp_.vRigth[iter] + (bp_.vRigth[iter+1] -
       bp_.vRigth[iter])*p_path;
   return ((v > vapprox) ? state_phase::GAS : state_phase::LIQ_STEAM);
+}
+const GasParameters *modelGeneral::getGasParameters() const {
+  // return NULL or pointer to GasParameters
+  return parameters_.get();
 }
 
 double modelGeneral::GetVolume() const {
@@ -96,39 +102,4 @@ parameters modelGeneral::GetParametersCopy() const {
 
 const_parameters modelGeneral::GetConstParameters() const {
   return parameters_->cgetConstparameters();
-}
-
-void modelGeneral::setDynamicParameters() {
-  // DEVELOP
-  // делаем лишнюю копию параметров,хотя можно бы было хранить
-  //   указатели на эти структуры, но 1) при расчётах лучше дергать
-  //   данные со стака,               2) эти переходы не частые
-  std::unique_ptr<GasParameters> temp(
-      new GasParameters_dyn(parameters_->cgetParameters(),
-      parameters_->cgetConstParameters(), parameters_->cgetDynParameters(),
-      &dyn_parameters_update);
-     // params_update_f_));
-
-  temp.swap(parameters_);
-}
-
-void modelGeneral::setStaticParameters() {
-  std::unique_ptr<GasParameters> temp(
-      new GasParameters(parameters_->cgetParameters(),
-      parameters_->cgetConstParameters(),
-      parameters_->cgetDynParameters()));
-  temp.swap(parameters_);
-}
-
-//==================================================================
-// GasParametersConverter
-//==================================================================
-
-gasparametersConverter::gasparametersConverter(modelGeneral *md)
-  : md_(md) {
-  md_->setDynamicParameters();
-}
-
-gasparametersConverter::~gasparametersConverter() {
-  md_->setStaticParameters();
 }

@@ -18,9 +18,8 @@ class GasParameters {
 protected:
   state_phase sph_;
   parameters  vpte_;
-  const_parameters const_parameters_;
   // dyn_parameters содержат несколько важных полей
-  dyn_parameters  dyn_parameters_;
+  dyn_parameters  dyn_params_;
 
 protected:
   GasParameters(double v, double p, double t,
@@ -33,6 +32,9 @@ protected:
       const const_parameters cgp, dyn_parameters dgp);
 
   virtual ~GasParameters();
+
+public:
+  const_parameters const_params;
 
 public:
   double cgetV_K()            const;
@@ -54,9 +56,8 @@ public:
   double cgetBeta()       const;
 
   virtual void csetParameters(double v, double p, double t, state_phase sp);
-
 };
 
 std::ostream& operator<< (std::ostream &outstream, const GasParameters &gp);
 
-#endif  // _CORE__GAS_PARAMETERS__GAS_DESCRIPTION_STATIC_H_
+#endif  // ! _CORE__GAS_PARAMETERS__GAS_DESCRIPTION_STATIC_H_

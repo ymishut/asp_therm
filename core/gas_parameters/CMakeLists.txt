@@ -1,13 +1,15 @@
 cmake_minimum_required(VERSION 2.8)
 add_compile_options(-Wall -std=c++11)
 
+include_directories(../common)
+
 set(
   PARAMETERS_SRC
 
   gas_description.cpp
   gas_description_dynamic.cpp
   gas_description_static.cpp
-  gas_dynamic_update.cpp
+ # gas_dynamic_update.cpp
   gas_mix_init.cpp
   init_by_file.cpp
 )

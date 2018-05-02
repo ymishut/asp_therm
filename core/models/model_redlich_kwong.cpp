@@ -8,52 +8,109 @@
 
 #include <assert.h>
 
-Redlich_Kwong2::Redlich_Kwong2(modelName mn, const_parameters cgp,
-    dyn_parameters dgp, binodalpoints bp)
-  : modelGeneral::modelGeneral(mn, cgp, dgp, bp) {
+void Redlich_Kwong2::set_model_coef() {
   modelCoefA_ = 0.42748*std::pow(parameters_->cgetR(), 2.0) *
       std::pow(parameters_->cgetT_K(), 2.5) / parameters_->cgetP_K();
   modelCoefB_ = 0.08664*parameters_->cgetR()*parameters_->cgetT_K() /
       parameters_->cgetP_K();
 }
 
-Redlich_Kwong2::Redlich_Kwong2(modelName mn, parameters_mix components,
-    binodalpoints bp) {
-  assert(0);
+Redlich_Kwong2::Redlich_Kwong2(modelName mn, parameters prs,
+    const_parameters cgp, dyn_parameters dgp, binodalpoints bp)
+  : modelGeneral::modelGeneral(mn, prs, cgp, dgp, bp) {
+  set_model_coef();
 }
 
-//   integral
-double Redlich_Kwong2::internal_energy_integral(const parameters state) {
-  assert(0);
-  // вынесем разницу логарифмов
-  double log_differ = std::log(1);
+Redlich_Kwong2::Redlich_Kwong2(modelName mn, parameters prs,
+    parameters_mix components, binodalpoints bp)
+  : modelGeneral(mn, prs, components, bp) {
+  set_model_coef();
 }
 
-double Redlich_Kwong2::heat_capac_vol_integral(const parameters state) {
-  assert(0);
-}
-
-double Redlich_Kwong2::heat_capac_prs_integral(const parameters state) {
-  assert(0);
-}
-
-void Redlich_Kwong2::update_dyn_params(dyn_parameters &prev_state,
-    const parameters new_state) {
-  assert(0);
-  parameters prev_parm = prev_state.parm;
-// переменная для разности логарифмов
-  prev_state.parm = new_state;
-}
-
-Redlich_Kwong2 *Redlich_Kwong2::Init(modelName mn, const_parameters cgp,
-    dyn_parameters dgp, binodalpoints bp) {
+Redlich_Kwong2 *Redlich_Kwong2::Init(modelName mn, parameters prs,
+    const_parameters cgp, dyn_parameters dgp, binodalpoints bp) {
+  reset_error();
   // check const_parameters
-  if (!is_above0(cgp.acentricfactor, cgp.molecularmass,
+ /* if (!is_above0(cgp.acentricfactor, cgp.molecularmass,
       cgp.P_K, cgp.R, cgp.T_K,cgp.V_K)) {
     set_error_code(ERR_INIT | ERR_INIT_ZERO);
     return nullptr;
+  } */
+  bool is_valid = is_valid_cgp(cgp) && is_valid_dgp(dgp);
+  is_valid &= (!is_above0(prs.pressure, prs.temperature, prs.volume));
+  if (!is_valid) {
+    set_error_code(ERR_INIT | ERR_INIT_ZERO);
+    return nullptr;
   }
-  return new Redlich_Kwong2(mn, cgp, dgp, bp);
+  return new Redlich_Kwong2(mn, prs, cgp, dgp, bp);
+}
+
+Redlich_Kwong2 *Redlich_Kwong2::Init(modelName mn, parameters prs,
+    parameters_mix components, binodalpoints bp) {
+  // check const_parameters
+  reset_error();
+  bool is_valid = !components.empty();
+  is_valid &= (!is_above0(prs.pressure, prs.temperature, prs.volume));
+  if (!is_valid) {
+    set_error_code(ERR_INIT | ERR_INIT_ZERO | ERR_GAS_MIX);
+    return nullptr;
+  }
+  return new Redlich_Kwong2(mn, prs, components, bp);
+ }
+
+//  расчёт смотри в ежедневнике
+
+  // u(p, v, T) = u0 + integrate(....)dv
+//   return  u-u0
+double Redlich_Kwong2::internal_energy_integral(const parameters state) {
+  double ans = 3.0 * modelCoefA_ * 
+      log(state.volume / (state.volume + modelCoefB_)) /
+      (2.0 * sqrt(state.temperature) * modelCoefB_);
+  return ans;
+}
+
+// cv(p, v, T) = cv0 + integrate(...)dv
+//   return cv - cv0
+double Redlich_Kwong2::heat_capac_vol_integral(const parameters state) {
+  double ans = - 3 * modelCoefA_ *
+      log(state.volume / (state.volume + modelCoefB_)) /
+      (4.0 * pow(state.temperature, 2.5) * modelCoefB_);
+  return ans;
+}
+
+// return cp - cv
+double Redlich_Kwong2::heat_capac_dif_prs_vol(const parameters state) {
+  double R = parameters_->const_params.R,
+         T = state.temperature,
+         V = state.volume,
+         a = modelCoefA_,
+         b = modelCoefB_;
+  // сначала числитель
+  double num = 4.0 * R*R * T*T*T * V*V* (V + b)*(V + b) +
+      4.0*(V*V -b*b)*V*R*a*pow(T, 1.5)  +  a*a * (V-b)*(V-b);
+  // знаменатель
+  double dec = 4.0 * a * (2.0*V*V*V - 3*b*V*V + b*b*b)*pow(T, 1.5) - 
+      4.0 * V*V * R * T*T*T*T * (V+b)*(V+b);
+  // проверка занменателя на => 0.0
+  assert(is_above0(dec) && "Redlich_Kwong2::heat_capac_dif_prs_vol");
+  return num / dec;
+}
+
+// функция вызывается из класса GasParameters_dyn
+void Redlich_Kwong2::update_dyn_params(dyn_parameters &prev_state,
+    const parameters new_state) {
+  parameters prev_parm = prev_state.parm;
+  // internal_energy addition 
+  double du  = internal_energy_integral(new_state);
+  // heat_capacity_volume addition
+  double dcv = heat_capac_vol_integral(new_state);
+  // cp - cv
+  double dif_c = -new_state.temperature * heat_capac_dif_prs_vol(new_state);
+  prev_state.interval_energy += du;
+  prev_state.heat_cap_vol    += dcv;
+  prev_state.heat_cap_pres   += prev_state.heat_cap_vol + dif_c;
+  prev_state.parm = new_state;
+  prev_state.Update();
 }
 
 // visitor

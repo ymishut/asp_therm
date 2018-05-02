@@ -1,28 +1,31 @@
 #include "gas_description_dynamic.h"
 
+#include "model_general.h"
+
 #include <cmath>
 #include <utility>
 
 #include <assert.h>
 
-GasParameters_dyn::GasParameters_dyn(double v, double p, double t,
-    const_parameters cgp, dyn_parameters dgp,
-    dyn_params_update update_f)
-  : GasParameters(v, p, t, cgp, dgp), prev_vpte_({v, p, t}),
-    update_f_(update_f) {}
-
 GasParameters_dyn::GasParameters_dyn(parameters prs,
     const_parameters cgp, dyn_parameters dgp,
-    dyn_params_update update_f)
-  : GasParameters(prs, cgp, dgp), prev_vpte_(prs),
-    update_f_(update_f) {}
+    modelGeneral *mg)
+  : GasParameters(prs, cgp, dgp), prev_vpte_(prs), model_(mg) {}
+ //   update_f_(&modelGeneral::update_dyn_params) {}
 
-GasParameters_dyn::GasParameters_dyn(
-    const_parameters cgp, dyn_parameters dgp,
-    dyn_params_update update_f)
-  : GasParameters(dgp.parm, cgp, dgp),
-    prev_vpte_(dgp.parm), update_f_(update_f) {}
+GasParameters_dyn *GasParameters_dyn::Init(double v, double p, double t,
+    const_parameters cgp, dyn_parameters dgp, modelGeneral *mg) {
+  if (mg == nullptr)
+    return nullptr;
+  return new GasParameters_dyn({v,p,t}, cgp, dgp, mg);
+}
 
+GasParameters_dyn *GasParameters_dyn::Init(parameters prs,
+    const_parameters cgp, dyn_parameters dgp, modelGeneral *mg) {
+  if (mg == nullptr)
+    return nullptr;
+  return new GasParameters_dyn(prs, cgp, dgp, mg);
+}
 
 void GasParameters_dyn::csetParameters(double v, double p,
     double t, state_phase sp) {
@@ -31,7 +34,7 @@ void GasParameters_dyn::csetParameters(double v, double p,
   vpte_.pressure     = p;
   vpte_.temperature  = t;
   sph_               = sp;
-  update_f_(dyn_parameters_, vpte_);
+  model_->update_dyn_params(dyn_params_, vpte_);
  // assert(0);
   // update dyn_pars
   // updatePotentials();

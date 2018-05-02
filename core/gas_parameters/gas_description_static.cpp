@@ -11,12 +11,12 @@
 
 GasParameters::GasParameters(double v, double p, double t,
     const const_parameters cgp, dyn_parameters dgp)
-  : vpte_(parameters{v, p, t}), const_parameters_(cgp),
-    dyn_parameters_(dgp) {}
+  : vpte_(parameters{v, p, t}), const_params(cgp),
+    dyn_params_(dgp) {}
 
 GasParameters::GasParameters(parameters prs,
     const_parameters cgp, dyn_parameters dgp)
-  : vpte_(prs), const_parameters_(cgp), dyn_parameters_(dgp) {}
+  : vpte_(prs), const_params(cgp), dyn_params_(dgp) {}
 
 //==================================================================
 // static Init methods
@@ -41,42 +41,42 @@ std::ostream &operator<< (std::ostream &outstream,
 //==================================================================
 
 double GasParameters::cgetV_K() const {
-  return const_parameters_.V_K;
+  return const_params.V_K;
 }
 
 double GasParameters::cgetP_K() const {
-  return const_parameters_.P_K;
+  return const_params.P_K;
 }
 
 double GasParameters::cgetT_K() const {
-  return const_parameters_.T_K;
+  return const_params.T_K;
 }
 
 double GasParameters::cgetMolecularMass() const {
-  return const_parameters_.molecularmass;
+  return const_params.molecularmass;
 }
 
 double GasParameters::cgetR() const {
-  return const_parameters_.R;
+  return const_params.R;
 }
 
 double GasParameters::cgetAcentricFactor() const {
-  return const_parameters_.acentricfactor;
+  return const_params.acentricfactor;
 }
 
 //==================================================================
 // dyn_gasparametrs fields
 //==================================================================
 double GasParameters::cgetAdiabatic() const {
-  return dyn_parameters_.heat_cap_pres / dyn_parameters_.heat_cap_vol;
+  return dyn_params_.heat_cap_pres / dyn_params_.heat_cap_vol;
 }
 
 double GasParameters::cgetCV() const {
-  return dyn_parameters_.heat_cap_vol;
+  return dyn_params_.heat_cap_vol;
 }
 
 double GasParameters::cgetBeta() const {
-  return dyn_parameters_.beta_kr;
+  return dyn_params_.beta_kr;
 }
 
 //==================================================================
@@ -104,11 +104,11 @@ parameters GasParameters::cgetParameters() const {
 }
 
 dyn_parameters GasParameters::cgetDynParameters() const {
-  return dyn_parameters_;
+  return dyn_params_;
 }
 
 const_parameters GasParameters::cgetConstparameters() const {
-  return const_parameters_;
+  return const_params;
 }
 
 // virtual

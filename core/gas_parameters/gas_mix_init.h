@@ -63,17 +63,19 @@ class GasParameters_mix_dyn final : public GasParameters_mix {
   // previous pressure, volume and temperature
   parameters         prev_vpte_;
   // function for update dyn_parameters
-  dyn_params_update  update_f_;
+  modelGeneral      *model_;
+  // function for update dyn_parameters
+  // dyn_params_update  update_f_;
   // potentials      potentials_;
 
 private:
   GasParameters_mix_dyn(parameters prs, const_parameters cgp,
       dyn_parameters dgp, parameters_mix components,
-      dyn_params_update update_f);
+      modelGeneral *mg);
 
 public:
   static GasParameters_mix_dyn *Init(parameters prs,
-      parameters_mix components, dyn_params_update update_f);
+      parameters_mix components, modelGeneral *mg);
 
   void csetParameters(double v, double p, double t, state_phase sp) override;
 };

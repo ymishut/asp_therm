@@ -6,22 +6,29 @@
 //=========================================================================
 // dyn_parameters
 //=========================================================================
-dyn_parameters::dyn_parameters(double cp, double cv, parameters pm)
-  : heat_cap_vol(cv), heat_cap_pres(cp), beta_kr(0.0), parm(pm) {
-  double ai = cp / cv;
-  beta_kr = std::pow(2.0 / (ai + 1.0), ai / (ai - 1.0));
+dyn_parameters::dyn_parameters(double cp, double cv, double 
+    int_eng, parameters pm)
+  : heat_cap_vol(cv), heat_cap_pres(cp), interval_energy(int_eng), 
+    beta_kr(0.0), parm(pm) {
+  Update();
 }
 
-dyn_parameters *dyn_parameters::Init(double cp, double cv, parameters pm) {
+dyn_parameters *dyn_parameters::Init(double cp, double cv, double int_eng, parameters pm) {
   // проверка входных данных
   // check input data:
   //  --  больше нуля     --  > 0.0
   //  --  конечны         --  finite
-  bool correct_input = is_above0(cp, cv);
+  bool correct_input = is_above0(cp, cv, int_eng);
   correct_input &= is_above0(pm.pressure, pm.temperature, pm.volume);
   if (!correct_input)
     return nullptr;
-  return new dyn_parameters(cp, cv, pm);
+  return new dyn_parameters(cp, cv, int_eng, pm);
+}
+
+// update beta critical
+void dyn_parameters::Update() {
+  double ai = heat_cap_pres / heat_cap_vol;
+  beta_kr = std::pow(2.0 / (ai + 1.0), ai / (ai - 1.0));
 }
 
 //=========================================================================
@@ -69,7 +76,7 @@ bool is_valid_cgp(const const_parameters &cgp) {
 
 bool is_valid_dgp(const dyn_parameters &dgp) {
   if (!is_above0(dgp.heat_cap_pres, dgp.beta_kr,
-      dgp.heat_cap_vol)) {
+      dgp.heat_cap_vol, dgp.interval_energy)) {
     set_error_code(ERR_INIT | ERR_INIT_ZERO);
     return false;
   }

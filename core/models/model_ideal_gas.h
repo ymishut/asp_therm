@@ -1,24 +1,34 @@
 #ifndef _CORE__MODELS__MODEL_IDEAL_GAS_H_
 #define _CORE__MODELS__MODEL_IDEAL_GAS_H_
 
-#include <memory>
-
 #include "model_general.h"
+
+#include <memory>
 
 class IdealGas final: public modelGeneral {
 private:
-  IdealGas(modelName mn, const_parameters cgp,
+  IdealGas(modelName mn, parameters prs, const_parameters cgp,
       dyn_parameters dgp, binodalpoints bp);
+
+  IdealGas(modelName mn, parameters prs, parameters_mix components,
+      binodalpoints bp);
+
+public:
+  static IdealGas *Init(modelName mn, parameters prs, const_parameters cgp,
+      dyn_parameters dgp, binodalpoints bp);
+
+  static IdealGas *Init(modelName mn, parameters prs, parameters_mix components,
+      binodalpoints bp);
+// ========================== <^__.__^>  ===============================
+//  OVERRIDED METHODS
+// ========================== <^__.__^>  ===============================
 
   void update_dyn_params(dyn_parameters &prev_state,
       const parameters new_state) override;
-
-public:
-  static IdealGas *Init(modelName mn, const_parameters cgp,
-      dyn_parameters dgp, binodalpoints bp);
+  
+  void DynamicflowAccept(DerivateFunctor &df) override;
 
   bool IsValid() const override;
-  void DynamicflowAccept(DerivateFunctor &df) override;
 //  void setTemperature(double v, double p);
 
   void SetVolume(double p, double t)      override;
@@ -27,4 +37,4 @@ public:
   double GetPressure(double v, double t)  const override;
 };
 
-#endif  // _CORE__MODELS__MODEL_IDEAL_GAS_H_
+#endif  // ! _CORE__MODELS__MODEL_IDEAL_GAS_H_

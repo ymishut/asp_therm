@@ -12,23 +12,18 @@
 #include <functional>
 #include <memory>
 
-
+/* // flow dynamic modeling
 typedef std::array<double, 2> difresult_t;
 typedef std::function<void (const difresult_t &x, difresult_t &dxdt,
     double t)> difEquat_f;
-
-// Конвертер статических параметров газав динамические и обратно
-//   legacy функциональность
-// change "parameters_" type among Igasparameters realizations
-class gasparametersConverter;
-
+*/
 // класс для восстановления типа модели
 // DEVELOP
 //   Acceptor
 // get the functor of the model for calculating gas dynamic equation
 class DerivateFunctor {
 public:
-  virtual void getFunctor(class idealGas &mg)       = 0;
+  virtual void getFunctor(class IdealGas &mg)       = 0;
   virtual void getFunctor(class Redlich_Kwong2 &mg) = 0;
   virtual void getFunctor(class Peng_Robinson &mg)  = 0;
   virtual ~DerivateFunctor() {}
@@ -36,8 +31,6 @@ public:
 
 class modelGeneral : boost::noncopyable {
 protected:
-  friend class gasparametersConverter;
-
   // Храним указатель на GasParameters
   //   чтобы создать возможность использовать ООП для расчёта динамики газа
   // parameters_ must be a pointer for enable
@@ -52,11 +45,11 @@ protected:
  // dyn_params_update params_update_f_;
 
 protected:
-  modelGeneral(modelName mn, const_parameters cgp,
+  modelGeneral(modelName mn, parameters prs, const_parameters cgp,
       dyn_parameters dgp, binodalpoints bp);
 
-  modelGeneral(modelName mn, parameters_mix components,
-      binodalpoints bp, dyn_params_update update_f);
+  modelGeneral(modelName mn, parameters prs, parameters_mix components,
+      binodalpoints bp);
 
   state_phase setState_phase(double v, double p, double t);
   int32_t  setState_phasesub(double p);
@@ -64,6 +57,9 @@ protected:
   void setDynamicParameters();
   void setStaticParameters();
 
+  const GasParameters *getGasParameters() const;
+
+public:
 //  virtual double internal_energy_integral(
 //      const parameters state) = 0;
   /// Функция обновления динамических параметров
@@ -71,13 +67,13 @@ protected:
   virtual void update_dyn_params(dyn_parameters &prev_state,
       const parameters new_state) = 0;
 
-public:
   // Модели имеют определенные границы применения
   //   метод isValid проверяет их
   // Models have application limits
   //  isValid - method for check this limits
   virtual bool IsValid()                         const = 0;
   virtual void DynamicflowAccept(DerivateFunctor &df)  = 0;
+
   virtual void SetVolume(double p, double t)           = 0;
   virtual void SetPressure(double v, double t)         = 0;
   virtual double GetVolume(double p, double t)   const = 0;
@@ -97,12 +93,4 @@ public:
   virtual ~modelGeneral();
 };
 
-class gasparametersConverter {
-  modelGeneral *md_;
-
-public:
-  explicit gasparametersConverter(modelGeneral *md);
-  ~gasparametersConverter();
-};
-
-#endif  // _CORE__MODELS__MODEL_GENERAL_H_
+#endif  // ! _CORE__MODELS__MODEL_GENERAL_H_

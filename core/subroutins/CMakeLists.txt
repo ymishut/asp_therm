@@ -7,6 +7,7 @@ set(
   file_reading.cpp
   inputdata_by_file.cpp
   load_config.cpp
+  xml_reader.cpp
 
   models_output.h
 )

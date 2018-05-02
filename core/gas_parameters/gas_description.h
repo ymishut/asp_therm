@@ -54,7 +54,8 @@ enum class state_phase : int32_t {
   GAS
 };
 static const std::array<std::string, 4> stateToString {
-  "SCF", "LIQUID", "LIQ_STEAM", "GAS"};
+  "SCF", "LIQUID", "LIQ_STEAM", "GAS"
+};
 
 // ================================================================
 // parameters struct
@@ -98,19 +99,26 @@ struct dyn_parameters {
 private:
   // закроем все конструкторы
   // close all constructors
-  dyn_parameters(double cv, double cp, parameters pm);
+  dyn_parameters(double cv, double cp, double int_eng, parameters pm);
 
 public:
-  static dyn_parameters *Init(double cv, double cp, parameters pm);
-//  void Update();
+  static dyn_parameters *Init(double cv, double cp, double int_eng,
+      parameters pm);
+  // обновить критический параметр истечения
+  void Update();
 };
 
+class modelGeneral;
 /// Указатель на функцию обновления динамических параметров
 ///   (зависит от используемой модели реального газа)
 /// Pointer to dynaparameter updating function
 ///   (depended by real gas model)
-typedef void (*dyn_params_update)(dyn_parameters &prev_state,
-    const parameters new_state);
+typedef void(*dyn_params_update)(dyn_parameters &prev_state,
+  const parameters new_state);
+// вторая версия функции с жесткой связью на модель
+// typedef void (modelGeneral::*dyn_params_update)(
+//    dyn_parameters &prev_state, const parameters new_state);
+
 // ================================================================
 // potentials struct
 // ================================================================
@@ -188,4 +196,4 @@ public:
   virtual ~Igasparameters() {}
 };
 */
-#endif  // _CORE__GAS_PARAMETERS__GAS_DESCRIPTION_H_
+#endif  // ! _CORE__GAS_PARAMETERS__GAS_DESCRIPTION_H_
