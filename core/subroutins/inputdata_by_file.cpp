@@ -19,12 +19,12 @@ namespace {
 InputData::InputData(const std::string &filename)
   : infile_(filename, std::ios_base::in) {
   if (!infile_.is_open())
-    set_error_code(ERR_FILEIO);
+    set_error_code(ERR_FILEIO_T);
   try {
     ReadFile d;
     inputParameters_ = (d.parseFile(infile_));
   } catch(modelExceptions &e) {
-    set_error_code(ERR_FILEIO);
+    set_error_code(ERR_FILEIO_T);
     std::cerr << e.what() << std::endl;
   }
 }
@@ -37,7 +37,7 @@ std::vector<double> InputData::getConstgasparameters() {
     }
   } catch (boost::bad_lexical_cast &e) {
     std::cerr << e.what() << std::endl;
-    set_error_code(ERR_STRING);
+    set_error_code(ERR_STRING_T);
   }
   return vec;
 }
@@ -50,7 +50,7 @@ std::pair<double, double> InputData::getBalloonVF() {
          boost::lexical_cast<double>(inputParameters_[CONST_GASP + 1]));
   } catch (boost::bad_lexical_cast &e) {
     std::cerr << e.what() << std::endl;
-    set_error_code(ERR_STRING);
+    set_error_code(ERR_STRING_T);
   }
   return pr;
 }
@@ -64,7 +64,7 @@ std::vector<double> InputData::getBalloonParameters() {
       }
   } catch (boost::bad_lexical_cast &e) {
     std::cerr << e.what() << std::endl;
-    set_error_code(ERR_STRING);
+    set_error_code(ERR_STRING_T);
   }
   return vec;
 }

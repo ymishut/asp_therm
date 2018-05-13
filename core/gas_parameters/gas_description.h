@@ -85,7 +85,7 @@ struct dyn_parameters {
  // adiabatic_index,  // Cp/Cv
   double heat_cap_vol,     // heat capacity for volume = const // Cv
          heat_cap_pres,    // heat capacity for pressure = const // Cp
-         interval_energy,  //
+         internal_energy,  //
          beta_kr;          // beta_kr=beta_kr(adiabatic_index)
                            //   = [0.0, ... ,1.0]
                            //   if (pressure_1/pressure_2 < beta_kr):

@@ -64,13 +64,14 @@ GasParameters_mix::GasParameters_mix(parameters prs, const_parameters cgp,
       dyn_parameters dgp, parameters_mix components)
   : GasParameters(prs, cgp, dgp), components_(components) {}
 
+/*
 GasParameters_mix *GasParameters_mix::Init(parameters prs,
       parameters_mix components) {
   if (components.empty()) {
     set_error_code(ERR_INIT | ERR_INIT_NULLP | ERR_GAS_MIX);
     return nullptr;
   }
-// РАСЧИТАЕМ СРЕДНИЕ КОНСТАНТНЫЕ ПАРАМЕТРЫ
+    // РАСЧИТАЕМ СРЕДНИЕ КОНСТАНТНЫЕ ПАРАМЕТРЫ
   reset_error();
   // количество параметров и их значения для критической точки
   // АДИТИВНЫЕ ПАРАМЕТРЫ СМЕСИ (молекулярная масса и газовая постоянная)
@@ -79,7 +80,7 @@ GasParameters_mix *GasParameters_mix::Init(parameters prs,
   // init gasmix const_parameters
   std::unique_ptr<const_parameters> tmp_cgp(const_parameters::Init(
       avr_vals[0], avr_vals[1], avr_vals[2],
-      /* 0.0 throw excep */ avr_vals[3], avr_vals[4]));
+      avr_vals[3], avr_vals[4]));
   if (tmp_cgp == nullptr) {
     set_error_code(ERR_INIT | ERR_GAS_MIX | ERR_CALC_GAS_P);
     return nullptr;
@@ -104,7 +105,9 @@ GasParameters_mix *GasParameters_mix::Init(parameters prs,
    // dgp_tmp[0] += x.first * x.second.heat_cap_vol;
    // dgp_tmp[1] += x.first * x.second.heat_cap_pres;
  // }
-}
+}*/
+
+
 // =========================================================
 // GasParameters_mix_dyn methods
 // =========================================================
@@ -112,6 +115,7 @@ GasParameters_mix_dyn::GasParameters_mix_dyn(parameters prs,
     const_parameters cgp, dyn_parameters dgp, parameters_mix components,
     modelGeneral *mg)
   : GasParameters_mix(prs, cgp, dgp, components), model_(mg) {}
+
    // update_f_(&modelGeneral::update_dyn_params) {}
   // DEVELOP
   //   23_03_2018
@@ -130,7 +134,7 @@ GasParameters_mix_dyn::GasParameters_mix_dyn(parameters prs,
 GasParameters_mix_dyn *GasParameters_mix_dyn::Init(
     parameters prs, parameters_mix components, modelGeneral *mg) {
   if (components.empty() || mg == nullptr) {
-    set_error_code(ERR_INIT | ERR_INIT_NULLP | ERR_GAS_MIX);
+    set_error_code(ERR_INIT_T | ERR_INIT_NULLP | ERR_GAS_MIX);
     return nullptr;
   }
 // РАСЧИТАЕМ СРЕДНИЕ КОНСТАНТНЫЕ ПАРАМЕТРЫ
@@ -144,7 +148,7 @@ GasParameters_mix_dyn *GasParameters_mix_dyn::Init(
       avr_vals[0], avr_vals[1], avr_vals[2],
       /* 0.0 throw excep */ avr_vals[3], avr_vals[4]));
   if (tmp_cgp == nullptr) {
-    set_error_code(ERR_INIT | ERR_GAS_MIX | ERR_CALC_GAS_P);
+    set_error_code(ERR_INIT_T | ERR_GAS_MIX | ERR_CALC_GAS_P);
     return nullptr;
   }
   // инициализируем динамические параметры
@@ -157,18 +161,16 @@ GasParameters_mix_dyn *GasParameters_mix_dyn::Init(
     dgp_cpt.push_back({x.first, x.second.second});
     mg->update_dyn_params(dgp_cpt.back().second, prs);
   }
-  std::array<double, 2> dgp_tmp = {0.0, 0.0};// 0.0, 0.0};
+  std::array<double, 3> dgp_tmp = {0.0, 0.0, 0.0};
   for (auto const &x : dgp_cpt) {
     dgp_tmp[0] += x.first * x.second.heat_cap_vol;
     dgp_tmp[1] += x.first * x.second.heat_cap_pres;
-    // next two is some shit
-   // dgp_tmp[2] += components[i].first * dgp_cpt[i].interval_energy;
-  //  dgp_tmp[3] += components[i].first * dgp_cpt[i].beta_kr;
+    dgp_tmp[2] += x.first * x.second.internal_energy;
   }
   std::unique_ptr<dyn_parameters> tmp_dgp(dyn_parameters::Init(
-      dgp_tmp[0], dgp_tmp[1], prs));
+      dgp_tmp[0], dgp_tmp[1], dgp_tmp[2], prs));
   if (tmp_dgp == nullptr) {
-    set_error_code(ERR_INIT | ERR_GAS_MIX | ERR_CALC_GAS_P);
+    set_error_code(ERR_INIT_T | ERR_GAS_MIX | ERR_CALC_GAS_P);
     return nullptr;
   }
   return new GasParameters_mix_dyn(prs, *tmp_cgp, *tmp_dgp,
@@ -182,19 +184,18 @@ GasParameters_mix_dyn *GasParameters_mix_dyn::Init(
   vpte_.pressure     = p;
   vpte_.temperature  = t;
   sph_ = sp;
-  // std::vector<dyn_parameters> dgp_cpt(components_.size());
   for (auto &x : components_)
     model_->update_dyn_params(x.second.second, vpte_);
   dyn_params_.heat_cap_vol  = 0.0;
   dyn_params_.heat_cap_pres = 0.0;
-  dyn_params_.interval_energy = 0.0;
+  dyn_params_.internal_energy = 0.0;
   dyn_params_.beta_kr = 0.0;
   dyn_params_.parm = vpte_;
   for (auto const &x : components_) {
     dyn_params_.heat_cap_vol  += x.first * x.second.second.heat_cap_vol;
     dyn_params_.heat_cap_pres += x.first * x.second.second.heat_cap_pres;
-    dyn_params_.interval_energy +=
-        x.first * x.second.second.interval_energy;
+    dyn_params_.internal_energy +=
+        x.first * x.second.second.internal_energy;
     dyn_params_.beta_kr += x.first * x.second.second.beta_kr;
   }
 }

@@ -7,9 +7,9 @@
 #include <memory>
 
 class Peng_Robinson: public modelGeneral {
-  double modelCoefA_,
-         modelCoefB_,
-         modelCoefK_;
+  double model_coef_a_,
+         model_coef_b_,
+         model_coef_k_;
 
 private:
   Peng_Robinson(modelName mn, parameters prs, const_parameters cgp,
@@ -26,7 +26,7 @@ protected:
 
   double internal_energy_integral(const parameters state);
   double heat_capac_vol_integral(const parameters state);
-  double heat_capac_prs_integral(const parameters state);
+  double heat_capac_dif_prs_vol(const parameters state);
 
 public:
   static Peng_Robinson *Init(modelName mn, parameters prs,
@@ -44,9 +44,9 @@ public:
   double GetVolume(double p, double t)    const override;
   double GetPressure(double v, double t)  const override;
 
-  double getCoefA() const;
-  double getCoefB() const;
-  double getCoefK() const;
+  double GetCoefficient_a() const;
+  double GetCoefficient_b() const;
+  double GetCoefficient_k() const;
 };
 
 #endif  // _CORE__MODELS__MODEL_PENG_ROBINSON_H_

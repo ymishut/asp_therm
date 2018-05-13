@@ -10,7 +10,7 @@ class InitGasParameters {
   std::vector<std::string> content_;
 
 public:
-  static GasParameters *InitGasParameters(const std::string &file);
+  static GasParameters *InitGasParameters(const std::string &filename);
   static std::vector<GasParameters *>
       InitGasParameters(const std::vector<std::string> *files);
 

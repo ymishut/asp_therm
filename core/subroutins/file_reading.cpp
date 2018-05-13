@@ -14,7 +14,7 @@ void ReadFile::lineProcessing() {
     } else {
       size_t strIter = line_.find('=');
       if (strIter == line_.size()) {
-        set_error_code(ERR_FILEIO);
+        set_error_code(ERR_FILEIO_T);
         return;
       }
       line_ = line_.substr(strIter + 1);
@@ -32,7 +32,7 @@ std::vector<std::string> ReadFile::parseFile(
     if (!std::getline(instream, line_))
       break;
     lineProcessing();
-    if (get_error_code() != ERR_SUCCESS) {
+    if (get_error_code() != ERR_SUCCESS_T) {
       std::cerr << get_error_message() << std::endl;
       break;
     }

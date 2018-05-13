@@ -22,16 +22,17 @@
 
 // DEVELOP
 //   с typedef'ами здесь перетого переэтого,
-//   надо было в структуры завернуть
+//   надо было в структуры завернуть,
+//   но так std функции испотльзовать удобно
 
 typedef std::pair<const_parameters, dyn_parameters>
     const_dyn_parameters;
 //                молярная доля, % ; параметры доли
 typedef std::multimap<const double, const_dyn_parameters> parameters_mix;
 
-
 std::pair<const_parameters *, dyn_parameters *>
     get_parameters_of_mix(parameters_mix cgp_mix);
+
 
 
 class GasParameters_mix : public GasParameters {
@@ -41,12 +42,6 @@ protected:
 protected:
   GasParameters_mix(parameters prs, const_parameters cgp,
       dyn_parameters dgp, parameters_mix components);
-
-// public:
-  static GasParameters_mix *Init(parameters prs,
-      parameters_mix components);
-
-  void csetParameters(double v, double p, double t, state_phase sp) override;
 };
 
 

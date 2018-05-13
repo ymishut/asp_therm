@@ -29,11 +29,11 @@ template<class T,
     class = typename std::enable_if<std::is_floating_point<T>::value>::type>
 void CardanoMethod(const T *coef, std::complex<T> *results) {
   if ((coef == nullptr) || (results == nullptr)) {
-    set_error_code(ERR_INIT | ERR_INIT_NULLP);
+    set_error_code(ERR_INIT_T | ERR_INIT_NULLP);
     return;
   }
   if (coef[0] == 0.0) {
-    set_error_code(ERR_INIT | ERR_INIT_ZERO);
+    set_error_code(ERR_INIT_T | ERR_INIT_ZERO);
     return;
   }
   const T  b = coef[1]/coef[0],

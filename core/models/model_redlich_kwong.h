@@ -7,8 +7,8 @@
 #include <memory>
 
 class Redlich_Kwong2 final: public modelGeneral {
-  double modelCoefA_,
-         modelCoefB_;
+  double model_coef_a_,
+         model_coef_b_;
 
 private:
   Redlich_Kwong2(modelName mn, parameters prs,
@@ -45,8 +45,8 @@ public:
   double GetVolume(double p, double t)    const override;
   double GetPressure(double v, double t)  const override;
 
-  double getCoefA() const;
-  double getCoefB() const;
+  double GetCoefficient_a() const;
+  double GetCoefficient_b() const;
 };
 
 #endif  // ! _CORE_MODELS__MODEL_REDLICH_KWONG_H_

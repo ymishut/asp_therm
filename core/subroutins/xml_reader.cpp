@@ -1,5 +1,8 @@
 #include "xml_reader.h"
 
+#include "target.h"
+#include "models_errors.h"
+
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -12,16 +15,10 @@
 #endif // _OS_WINDOWS
 
 
-#ifdef _DEBUG
-// buffer of error message (for debuging)
-static char errmsg[200];
-#endif  // _DEBUG
-
 // =========================================================================
 // Struct FileReader
 // =========================================================================
 // struct for RAII implementation of file 
-
 struct FileReader {
   FILE *file;
   int size;
@@ -29,15 +26,18 @@ struct FileReader {
   FileReader(char *name) {
     if (name == NULL) {
 #ifdef _DEBUG
-      strcpy(errmsg, "FileReader name == null\0");
+      set_error_code(ERR_FILEIO_T | ERR_FILE_IN);
+      set_error_message("filename is empty");
 #endif  // _DEBUG
       return;
     }
     file = fopen(name, "rb");
     if (file == NULL) {
-#ifdef _DEBUG
-      strcpy(errmsg, "FileReader cannot find file\0");
-#endif  // _DEBUG
+      set_error_code(ERR_FILEIO_T | ERR_FILE_IN);
+      char err[ERR_MSG_MAX_LEN] = {0};
+      strncpy(err, name, ERR_MSG_MAX_LEN - 30);
+      strcat(err, "file not found");
+      set_error_message(err);
       return;
     }
     fseek(file, 0L, SEEK_END);
@@ -56,6 +56,77 @@ private:
   FileReader &operator= (const FileReader &fr);
 };
 
+// =========================================================================
+// implicit functions
+// =========================================================================
+// check line is xml_comment (<! bla-bla -->)
+/// str_begin     - begin of the string
+/// nx_str_begin  - begin of NEXT string
+/// is_multiline  - is multiline comment
+bool is_comment(const char *str_begin, const char *nx_str_begin,
+    bool &is_multiline = false) {
+  if (str_begin == NULL)
+    return true;
+  char *tmp_ch = str_begin;
+  char *str_end = NULL;
+  // if line is last in file
+  //   nx_str_begin == NULL
+  if (nx_str_begin == NULL) {
+    str_end = strchr(str_begin, '\n');
+    if (str_end == NULL)
+      return true;
+  } else {
+    if (nx_str_begin < str_begin)
+      return true;
+    str_end = nx_str_begin - 1;
+  }
+  // now can check data
+  while (tmp_ch != str_end) {
+    if (*tmp_ch == '<') {
+      if (*(tmp_ch + 1) == '!') {
+        // string is comment, try to find end of comment
+        char *tag_end = strchr(tmp_ch, '>');
+        while (tag_end) {
+          if (tag_end > str_end)
+            break;
+          if ((*(tag_end - 1) == '-') && (*(tag_end - 2) == '-')) {
+            // it is not a multiline comment,
+            //   check tail os string
+            is_multiline = false;
+            if ((tag_end + 1) != str_end)
+              return is_comment(tag_end + 1, nx_str_begin, is_multiline);
+            return true;
+          }
+          tag_end= strchr(tmp_ch, '>');
+        }
+        is_multiline = true;
+        return true;
+      }
+      // после '<' не было !, значит не коммент
+      return false;
+    }
+    ++tmp_ch;
+  }
+  // строка пуста
+  return true;
+}
+
+
+// =========================================================================
+// class XMLReader
+// =========================================================================
+  // subclass xml_node
+XMLReader::xml_node *XMLReader::xml_node::Init(int line_number,
+     const std::vector<char *> &content, bool utf8toCP1251)
+  : name(""), line_number(line_number), content(content),
+    utf8toCP125(utf8toCP1251) {
+  init();
+}
+
+bool XMLReader::xml_node::init() {
+  assert(0);
+}
+
 XMLReader::XMLReader(char *begin, char *end, bool utf8toCP1251)
   : buffer_begin_(begin), buffer_end_(end), utf8toCP1251_(utf8toCP1251),
     freeing_(false) {
@@ -70,7 +141,7 @@ XMLReader::XMLReader(char *filename, bool utf8toCP1251)
   if (fread(buffer_begin_, fr.size, 1, fr.file) != 1) {
     delete[] buffer_begin_;
 #ifdef _DEBUG
-    strcpy(errmsg, "in readXML 'fread' error\0");
+    set_error_code(ERR_FILEIO_T | ERR_FILE_IN_ST);
 #endif  // _DEBUG
     return;
   }
@@ -88,13 +159,16 @@ void XMLReader::init_data() {
     if (*tmp++ == '\n')
       content_.push_back(tmp);
   }
+  // add NULL in tail
+  content_.push_back(NULL);
   /* while (tmp != NULL) {
     content_.push_back(tmp);
     // лишняя проверка на конец строки (\0)
     tmp = strchr(tmp, '\n');
   } */
   strs_count_ = content_.size();
-  fill_parameters();
+  assert(0 && "init root node and next");
+ // fill_parameters();
 }
 
 void XMLReader::fill_parameters() {

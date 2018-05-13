@@ -11,12 +11,11 @@
 
 GasParameters::GasParameters(double v, double p, double t,
     const const_parameters cgp, dyn_parameters dgp)
-  : vpte_(parameters{v, p, t}), const_params(cgp),
-    dyn_params_(dgp) {}
+  : vpte_(parameters{v, p, t}), dyn_params_(dgp), const_params(cgp) {}
 
 GasParameters::GasParameters(parameters prs,
     const_parameters cgp, dyn_parameters dgp)
-  : vpte_(prs), const_params(cgp), dyn_params_(dgp) {}
+  : vpte_(prs), dyn_params_(dgp), const_params(cgp) {}
 
 //==================================================================
 // static Init methods

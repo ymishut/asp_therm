@@ -8,7 +8,7 @@
 //=========================================================================
 dyn_parameters::dyn_parameters(double cp, double cv, double 
     int_eng, parameters pm)
-  : heat_cap_vol(cv), heat_cap_pres(cp), interval_energy(int_eng), 
+  : heat_cap_vol(cv), heat_cap_pres(cp), internal_energy(int_eng), 
     beta_kr(0.0), parm(pm) {
   Update();
 }
@@ -68,7 +68,7 @@ const_parameters
 bool is_valid_cgp(const const_parameters &cgp) {
   if (!is_above0(cgp.acentricfactor, cgp.molecularmass,
       cgp.P_K, cgp.R, cgp.T_K, cgp.V_K)) {
-    set_error_code(ERR_INIT | ERR_INIT_ZERO);
+    set_error_code(ERR_INIT_T | ERR_INIT_ZERO);
     return false;
   }
   return true;
@@ -76,8 +76,8 @@ bool is_valid_cgp(const const_parameters &cgp) {
 
 bool is_valid_dgp(const dyn_parameters &dgp) {
   if (!is_above0(dgp.heat_cap_pres, dgp.beta_kr,
-      dgp.heat_cap_vol, dgp.interval_energy)) {
-    set_error_code(ERR_INIT | ERR_INIT_ZERO);
+      dgp.heat_cap_vol, dgp.internal_energy)) {
+    set_error_code(ERR_INIT_T | ERR_INIT_ZERO);
     return false;
   }
   return true;

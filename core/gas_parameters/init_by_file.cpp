@@ -3,9 +3,11 @@
 #include <assert.h>
 
 GasParameters *InitGasParameters::InitGasParameters(
-    const std::string &file) {
+    const std::string &filename) {
   assert(0);
-  return NULL;
+  if (filename.empty()) {
+    return nullptr;
+  }
 }
 
 std::vector<GasParameters *> InitGasParameters::InitGasParameters(

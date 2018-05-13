@@ -37,7 +37,7 @@ void PhaseDiagram::calculateBinodal(
     // calculate derivate(dpressure/dtemperature)=0
     reset_error();
     bool has_uniq_root = CardanoMethod_HASUNIQROOT(&tempvec[0], &tempvec[4]);
-    if (get_error_code() != ERR_SUCCESS) {
+    if (get_error_code() != ERR_SUCCESS_T) {
       std::cerr << " for temperature index: "
                 << std::to_string(t_iter) << " Cardano method error \n";
       bdp->t[t_iter] = -1.0;
@@ -87,7 +87,7 @@ void PhaseDiagram::calculateBinodal(
 
       reset_error();
       bool has_uniq_root = CardanoMethod_HASUNIQROOT(&tempvec[0], &tempvec[4]);
-      if (get_error_code() != ERR_SUCCESS) {
+      if (get_error_code() != ERR_SUCCESS_T) {
         bdp->t[t_iter] = -1.0;
         break;
       }
@@ -184,7 +184,7 @@ PhaseDiagram::GetBinodalPoints(double VK, double PK,
   reset_error();
   bool isValid = is_above0(VK, PK, TK, acentric);
   if (!isValid) {
-    set_error_code(ERR_CALCULATE);
+    set_error_code(ERR_CALCULATE_T);
     set_error_message("PhaseDiagram::getBinodalPoints get incorrect data:\n"
         " V_K, P_K, T_K or acentric_factor <= 0.0 or is NaN");
     // return zeroes points

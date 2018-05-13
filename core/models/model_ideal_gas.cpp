@@ -19,7 +19,7 @@ IdealGas *IdealGas::Init(modelName mn, parameters prs,
   // check const_parameters
   if (!is_above0(cgp.acentricfactor, cgp.molecularmass,
       cgp.P_K, cgp.R, cgp.T_K,cgp.V_K)) {
-    set_error_code(ERR_INIT | ERR_INIT_ZERO);
+    set_error_code(ERR_INIT_T | ERR_INIT_ZERO);
     return nullptr;
   }
   IdealGas *tmp = new IdealGas(mn, prs, cgp, dgp, bp);
@@ -81,7 +81,7 @@ void idealGas::setTemperature(double v, double p) {
 
 double IdealGas::GetVolume(double p, double t) const {
   if (!is_above0(p, t)) {
-    set_error_code(ERR_CALCULATE | ERR_CALC_MODEL);
+    set_error_code(ERR_CALCULATE_T | ERR_CALC_MODEL);
     return 0.0;
   }
   return  t * parameters_->cgetR() / p;
@@ -89,7 +89,7 @@ double IdealGas::GetVolume(double p, double t) const {
 
 double IdealGas::GetPressure(double v, double t) const {
   if (!is_above0(v, t)) {
-    set_error_code(ERR_CALCULATE | ERR_CALC_MODEL);
+    set_error_code(ERR_CALCULATE_T | ERR_CALC_MODEL);
     return 0.0;
   }
   return t * parameters_->cgetR() / v;

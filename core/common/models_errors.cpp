@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-static ERROR_TYPE err_tmp     = ERR_SUCCESS;
+static ERROR_TYPE err_tmp     = ERR_SUCCESS_T;
 char err_msg[ERR_MSG_MAX_LEN] = {0};
 
 const char *custom_msg[] = {
@@ -48,18 +48,18 @@ static char *get_custom_err_msg() {
   //   Прицеливаемся в ногу
   char **list_of_custom_msg = NULL;
   switch (err_type) {
-    case ERR_SUCCESS:
-      return (char *)custom_msg[ERR_SUCCESS];
-    case ERR_FILEIO:
+    case ERR_SUCCESS_T:
+      return (char *)custom_msg[ERR_SUCCESS_T];
+    case ERR_FILEIO_T:
       list_of_custom_msg = (char **)custom_msg_fileio;
       break;
-    case ERR_CALCULATE:
+    case ERR_CALCULATE_T:
       list_of_custom_msg = (char **)custom_msg_calculate;
       break;
-    case ERR_STRING:
+    case ERR_STRING_T:
       list_of_custom_msg = (char **)custom_msg_string;
       break;
-    case ERR_INIT:
+    case ERR_INIT_T:
       list_of_custom_msg = (char **)custom_msg_init;
       break;
     default:
@@ -79,7 +79,7 @@ ERROR_TYPE get_error_code() {
 }
 
 void reset_error() {
-  err_tmp  = ERR_SUCCESS;
+  err_tmp  = ERR_SUCCESS_T;
  // memset(err_msg, 0, ERR_MSG_MAX_LEN);
   *err_msg = '\0';
 }

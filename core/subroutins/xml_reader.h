@@ -6,10 +6,13 @@
 #include "common.h"
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
+
 class XMLReader {
+  // обычная пара тэг-значение
   struct xml_pair {
     std::string tag;
     std::string value;
@@ -20,11 +23,42 @@ class XMLReader {
     xml_pair()
       : tag(std::string()), value(std::string()) {}
   };
+  // для однозначной индификации пары тэг-значение
+  class xml_node {
+  public:
+    // name of node
+    std::string name;
+    // номер первой строки ЭТОГО узла в документе
+    int line_number;
+    // номер ПОСЛЕДНЕЙ строки ЭТОГО узла в документе
+    int last_line_number;
+    // указатели на начала строк в xml
+    const std::vector<char *> &content;
+    // копии извлеченныx данных с тэгами с ключем
+    //   - порядковым номером в векторе "content"
+    std::map<int, xml_pair> data;
+    // внутренние узлы xml_node
+    std::vector<std::unique_ptr<xml_node>> inner_nodes;
+    // требуется ли перекодирование из utf8 в cp1251
+    bool utf8toCP1251;
+    // установим в true если формат документа не правильный
+    bool is_ill_formed;
+
+  public:
+    xml_node(int line_number,
+         const std::vector<char *> &content, bool utf8toCP1251);
+    // return nullptr if nodename not in inner_root
+    xml_node *GetNode(const std::string &nodename) const;
+    // return "" if tag not in data
+    std::string GetValue(const std::string &tag) const;
+
+  private:
+    bool init();
+  };
+
   // указатели на начала строк в xml
   std::vector<char *> content_;
-  // копии извлеченныx данных с тэгами с ключем 
-  //   - порядковым номером в векторе "content_"
-  std::map<int, xml_pair> data_;
+  std::unique_ptr<xml_node> root_node;
   // начало буффера данных
   char *buffer_begin_;
   char *buffer_end_;
@@ -56,7 +90,9 @@ private:
   std::string setEncodingCP1251(const std::string &utf8_str);
 
 public:
+  // init by file
   static XMLReader *Init(char *filename, bool utf8toCP1251);
+  // inti by char array
   static XMLReader *Init(char *begin, char *end, bool utf8toCP1251);
 
   ~XMLReader();
@@ -64,8 +100,8 @@ public:
   char *GetBuffer();
   int   GetBufferSize();
   /// get pointer to line with this tag
-  std::string Find_first_value(const std::string  &tag);
-  std::string Find_last_value(const std::string  &tag);
+  std::string Find_first_value(const std::string &tag);
+  std::string Find_last_value(const std::string &tag);
   /// get first tag in str
 };
 

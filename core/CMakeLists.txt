@@ -6,6 +6,7 @@ include_directories(gas_parameters)
 include_directories(models)
 include_directories(phase_diagram)
 include_directories(subroutins)
+include_directories(target)
 
 add_subdirectory(common)
 add_subdirectory(gas_parameters)

@@ -1,6 +1,8 @@
 #ifndef _CORE__MODELS__MODEL_GENERAL_H_
 #define _CORE__MODELS__MODEL_GENERAL_H_
 
+#include "target.h"
+
 #include "gas_description.h"
 #include "gas_description_static.h"
 #include "gas_mix_init.h"
