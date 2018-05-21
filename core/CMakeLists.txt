@@ -1,15 +1,19 @@
 cmake_minimum_required(VERSION 2.8)
 add_compile_options(-Wall -std=c++11)
 
-include_directories(common)
-include_directories(gas_parameters)
-include_directories(models)
-include_directories(phase_diagram)
-include_directories(subroutins)
-include_directories(target)
+project(asp_therm)
+
+#include_directories(common)
+#include_directories(gas_parameters)
+#include_directories(models)
+#include_directories(phase_diagram)
+#include_directories(subroutins)
+#include_directories(target)
 
 add_subdirectory(common)
 add_subdirectory(gas_parameters)
 add_subdirectory(models)
 add_subdirectory(phase_diagram)
 add_subdirectory(subroutins)
+
+add_executable(asp_therm main.cpp)

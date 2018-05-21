@@ -49,4 +49,4 @@ public:
   double GetCoefficient_k() const;
 };
 
-#endif  // _CORE__MODELS__MODEL_PENG_ROBINSON_H_
+#endif  // ! _CORE__MODELS__MODEL_PENG_ROBINSON_H_

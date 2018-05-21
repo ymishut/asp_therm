@@ -39,7 +39,7 @@ Redlich_Kwong2 *Redlich_Kwong2::Init(modelName mn, parameters prs,
   bool is_valid = is_valid_cgp(cgp) && is_valid_dgp(dgp);
   is_valid &= (!is_above0(prs.pressure, prs.temperature, prs.volume));
   if (!is_valid) {
-    set_error_code(ERR_INIT_T | ERR_INIT_ZERO);
+    set_error_code(ERR_INIT_T | ERR_INIT_ZERO_ST);
     return nullptr;
   }
   Redlich_Kwong2 *rk = new Redlich_Kwong2(mn, prs, cgp, dgp, bp);
@@ -60,7 +60,7 @@ Redlich_Kwong2 *Redlich_Kwong2::Init(modelName mn, parameters prs,
   bool is_valid = !components.empty();
   is_valid &= (!is_above0(prs.pressure, prs.temperature, prs.volume));
   if (!is_valid) {
-    set_error_code(ERR_INIT_T | ERR_INIT_ZERO | ERR_GAS_MIX);
+    set_error_code(ERR_INIT_T | ERR_INIT_ZERO_ST | ERR_GAS_MIX);
     return nullptr;
   }
   Redlich_Kwong2 *rk = new Redlich_Kwong2(mn, prs, components, bp);
@@ -148,7 +148,7 @@ void Redlich_Kwong2::SetPressure(double v, double t) {
 
 double Redlich_Kwong2::GetVolume(double p, double t) const {
   if (!is_above0(p, t)) {
-    set_error_code(ERR_CALCULATE_T | ERR_CALC_MODEL);
+    set_error_code(ERR_CALCULATE_T | ERR_CALC_MODEL_ST);
     return 0.0;
   }
   std::vector<double> coef {
@@ -165,7 +165,7 @@ double Redlich_Kwong2::GetVolume(double p, double t) const {
   CardanoMethod_HASUNIQROOT(&coef[0], &coef[4]);
 #ifdef _DEBUG
   if (!is_above0(coef[4])) {
-    set_error_code(ERR_CALCULATE_T | ERR_CALC_MODEL);
+    set_error_code(ERR_CALCULATE_T | ERR_CALC_MODEL_ST);
     return 0.0;
   }
 #endif
@@ -174,7 +174,7 @@ double Redlich_Kwong2::GetVolume(double p, double t) const {
 
 double Redlich_Kwong2::GetPressure(double v, double t) const {
   if (!is_above0(v, t)) {
-    set_error_code(ERR_CALCULATE_T | ERR_CALC_MODEL);
+    set_error_code(ERR_CALCULATE_T | ERR_CALC_MODEL_ST);
     return 0.0;
   }
   const double temp = parameters_->cgetR() * t / (v - model_coef_b_) -

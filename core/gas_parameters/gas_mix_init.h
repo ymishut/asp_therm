@@ -30,9 +30,10 @@ typedef std::pair<const_parameters, dyn_parameters>
 //                молярная доля, % ; параметры доли
 typedef std::multimap<const double, const_dyn_parameters> parameters_mix;
 
+/* занесено в класс GasParameters_mix_dyn 
 std::pair<const_parameters *, dyn_parameters *>
     get_parameters_of_mix(parameters_mix cgp_mix);
-
+*/
 
 
 class GasParameters_mix : public GasParameters {
@@ -71,6 +72,13 @@ private:
 public:
   static GasParameters_mix_dyn *Init(parameters prs,
       parameters_mix components, modelGeneral *mg);
+
+  // method for calculating binodal points
+  /// input : - parameters_mix &components
+  ///         - parameters prs
+  /// output: - const_gas_parameters
+  static std::unique_ptr<const_parameters> 
+      GetAverageParams(parameters_mix &components);
 
   void csetParameters(double v, double p, double t, state_phase sp) override;
 };

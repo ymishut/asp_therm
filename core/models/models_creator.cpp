@@ -1,14 +1,12 @@
 #include "models_creator.h"
 
 #include "models_errors.h"
-
-#include "gas_parameters/gas_description.h"
-#include "subroutins//models_output.h"
-#include "subroutins/inputdata_by_file.h"
-#include "phase_diagram/phase_diagram.h"
 // #include "dynamic_modeling.h"
-
-#include <boost/optional.hpp>
+// #include "models_output.h"
+// #include "inputdata_by_file.h"
+#ifdef BOOST_LIB_USED
+  #include <boost/optional.hpp>
+#endif  // BOOST_LIB_USED
 
 #include <functional>
 #include <map>
@@ -16,56 +14,71 @@
 #include <vector>
 #include <utility>
 
+#include <assert.h>
 
 Equation_of_state::~Equation_of_state() {}
 
-
 modelGeneral *Ideal_gas_equation::GetCalculatingModel(
-    modelName mn = modelName::REDLICH_KWONG2,
+    modelName mn = modelName::REDLICH_KWONG2, parameters prs,
     const_parameters cgp, dyn_parameters dgp) {
   // calculate binodal points
   reset_error();
   binodalpoints bp = PhaseDiagram::GetCalculated().GetBinodalPoints(
-       cgp.V_K, cgp.P_K, cgp.T_K, phasediag_model_, cgp.acentricfactor);
+      cgp.V_K, cgp.P_K, cgp.T_K, mn, cgp.acentricfactor);
   // check calculated bp
   if (bp.p.empty()) {
     std::cerr << get_error_message();
     std::cerr << "\n Could not create Idealgas Solver\n" << std::endl;
     return nullptr;
   }
-  return IdealGas::Init(mn, cgp, dgp, bp);
+  return IdealGas::Init(mn, prs, cgp, dgp, bp);
+}
+
+modelGeneral *Ideal_gas_equation::GetCalculatingModel(
+    modelName mn = modelName::REDLICH_KWONG2, parameters prs,
+    parameters_mix &components) {
+  assert(0);
+  reset_error();
+  if (components.empty()) {
+    std::cerr << " components of gas_mix was not setted!\n";
+    return NULL;
+  }
+
+  binodalpoints bp = PhaseDiagram::GetCalculated().GetBinodalPoints(
+      cgp.V_K, cgp.P_K, cgp.T_K, mn, cgp.acentricfactor);
+
 }
 
 modelGeneral *Redlich_Kwong_equation::GetCalculatingModel(
-    modelName mn = modelName::REDLICH_KWONG2,
+    modelName mn = modelName::REDLICH_KWONG2, parameters prs,
     const_parameters cgp, dyn_parameters dgp) {
   // calculate binodal points
   reset_error();
   binodalpoints bp = PhaseDiagram::GetCalculated().GetBinodalPoints(
-       cgp.V_K, cgp.P_K, cgp.T_K, phasediag_model_, cgp.acentricfactor);
+       cgp.V_K, cgp.P_K, cgp.T_K, mn, cgp.acentricfactor);
   // check calculated bp
   if (bp.p.empty()) {
     std::cerr << get_error_message();
     std::cerr << "\n Could not create RedlichKwong2 Solver\n" << std::endl;
     return nullptr;
   }
-  return Redlich_Kwong2::Init(mn, cgp, dgp, bp);
+  return Redlich_Kwong2::Init(mn, prs, cgp, dgp, bp);
 }
 
 modelGeneral *Peng_Robinson_equation::GetCalculatingModel(
-    modelName mn = modelName::PENG_ROBINSON,
+    modelName mn = modelName::PENG_ROBINSON, parameters prs,
     const_parameters cgp, dyn_parameters dgp) {
   // calculate binodal points
   reset_error();
   binodalpoints bp = PhaseDiagram::GetCalculated().GetBinodalPoints(
-       cgp.V_K, cgp.P_K, cgp.T_K, phasediag_model_, cgp.acentricfactor);
+       cgp.V_K, cgp.P_K, cgp.T_K, mn, cgp.acentricfactor);
   // check calculated bp
   if (bp.p.empty()) {
     std::cerr << get_error_message();
     std::cerr << "\n Could not create PengRobinson Solver\n" << std::endl;
     return nullptr;
   }
-  return Peng_Robinson::Init(mn, cgp, dgp, bp);
+  return Peng_Robinson::Init(mn, prs, cgp, dgp, bp);
 }
 
 /*  to another file

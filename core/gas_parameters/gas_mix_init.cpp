@@ -50,8 +50,8 @@ static std::array<double, 5> get_average_params(
     avr_vals[1] += x.first * x.second.first.P_K;
     avr_vals[2] += x.first * x.second.first.T_K;
 
-    avr_vals[3]*= x.first * x.second.first.molecularmass;
-    avr_vals[4]+= x.first * x.second.first.acentricfactor;
+    avr_vals[3]+= x.first * x.second.first.molecularmass;
+    avr_vals[4]*= x.first * x.second.first.acentricfactor;
   }
   avr_vals[4] = std::pow(avr_vals[4], 1.0 / components.size());
   return avr_vals;
@@ -175,6 +175,29 @@ GasParameters_mix_dyn *GasParameters_mix_dyn::Init(
   }
   return new GasParameters_mix_dyn(prs, *tmp_cgp, *tmp_dgp,
       components, mg);
+}
+
+std::unique_ptr<const_parameters> GasParameters_mix_dyn::GetAverageParams(
+    parameters_mix &components) {
+  if (components.empty()) {
+    set_error_code(ERR_INIT_T | ERR_INIT_NULLP | ERR_GAS_MIX);
+    return nullptr;
+  }
+// РАСЧИТАЕМ СРЕДНИЕ КОНСТАНТНЫЕ ПАРАМЕТРЫ
+  reset_error();
+  // количество параметров и их значения для критической точки
+  // АДИТИВНЫЕ ПАРАМЕТРЫ СМЕСИ (молекулярная масса и газовая постоянная)
+  std::array<double, 5> avr_vals = get_average_params(components);
+  // инициализируем постоянные параметры
+  // init gasmix const_parameters
+  std::unique_ptr<const_parameters> tmp_cgp(const_parameters::Init(
+      avr_vals[0], avr_vals[1], avr_vals[2],
+      /* 0.0 throw excep */ avr_vals[3], avr_vals[4]));
+  if (tmp_cgp == nullptr) {
+    set_error_code(ERR_INIT_T | ERR_GAS_MIX | ERR_CALC_GAS_P);
+    return nullptr;
+  }
+  return tmp_cgp;
 }
 
  void GasParameters_mix_dyn::csetParameters(double v, double p, double t,

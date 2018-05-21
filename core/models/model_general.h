@@ -8,7 +8,9 @@
 #include "gas_mix_init.h"
 #include "phase_diagram.h"
 
+#ifdef BOOST_LIB_ISED
 #include <boost/noncopyable.hpp>
+#endif  // BOOST_LIB_ISED
 
 #include <array>
 #include <functional>
@@ -31,7 +33,13 @@ public:
   virtual ~DerivateFunctor() {}
 };
 
+#ifdef BOOST_LIB_ISED
 class modelGeneral : boost::noncopyable {
+#else
+class modelGeneral {
+  modelGeneral(const modelGeneral &) = delete;
+  modelGeneral &operator=(const modelGeneral &) = delete;
+#endif  // BOOST_LIB_ISED
 protected:
   // Храним указатель на GasParameters
   //   чтобы создать возможность использовать ООП для расчёта динамики газа

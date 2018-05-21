@@ -1,16 +1,24 @@
 #ifndef _CORE__SUBROUTINS__FILE_READING_H_
 #define _CORE__SUBROUTINS__FILE_READING_H_
 
+#ifdef BOOST_LIB_USED
+  #include <boost/noncopyable.hpp>
+#endif  // BOOST_LIB_USED
+
+// #include <exception>
+#include <fstream>
 #include <string>
 #include <vector>
-#include <exception>
-#include <fstream>
-
-#include <boost/noncopyable.hpp>
 
 #include <stdint.h>
 
+#ifdef BOOST_LIB_USED
 class ReadFile : private boost::noncopyable {
+#else
+class ReadFile {
+  ReadFile(const ReadFile &) = delete;
+  ReadFile &operator=(const ReadFile &) = delete;
+#endif  // BOOST_LIB_USED
   uint32_t currentLine_,
            currentSignificantLine_;
   std::string line_;

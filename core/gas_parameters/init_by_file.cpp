@@ -2,7 +2,7 @@
 
 #include <assert.h>
 
-GasParameters *InitGasParameters::InitGasParameters(
+GasParameters *InitGasParameters::Init(
     const std::string &filename) {
   assert(0);
   if (filename.empty()) {
@@ -10,8 +10,8 @@ GasParameters *InitGasParameters::InitGasParameters(
   }
 }
 
-std::vector<GasParameters *> InitGasParameters::InitGasParameters(
+std::vector<GasParameters *> InitGasParameters::Init(
     const std::vector<std::string> *files) {
   assert(0);
-  return NULL;
+  return std::vector<GasParameters *>();
 }

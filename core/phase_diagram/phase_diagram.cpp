@@ -217,6 +217,13 @@ PhaseDiagram::GetBinodalPoints(double VK, double PK,
   return bp;
 }
 
+binodalpoints
+PhaseDiagram::GetBinodalPoints(parameters_mix &components,
+    modelName mn) {
+  const_parameters cgp = GasParameters_mix_dyn::GetAverageParams(components);
+  return PhaseDiagram::GetBinodalPoints(cgp.V_K, cgp.P_K, cgp.T_K, 
+      mn, cgp.acentricfasctor);
+}
 // DEVELOP
 //   NOT TESTED
 void PhaseDiagram::EraseBinodalPoints(modelName mn,

@@ -19,6 +19,7 @@ modelGeneral::modelGeneral(modelName mn, parameters prs,
           cgp.P_K, cgp.T_K, phasediag_model_, cgp.acentricfactor))*/ {
 }
 
+/// Газовая смесь
 modelGeneral::modelGeneral(modelName mn, parameters prs, parameters_mix components,
     binodalpoints bp)
   : parameters_(std::unique_ptr<GasParameters>(

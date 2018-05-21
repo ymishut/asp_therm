@@ -2,8 +2,11 @@
 #define _CORE__PHASE_DIAGRAM__PHASE_DIAGRAM_H_
 
 #include "phase_diagram_models.h"
+#include "gas_mix_init.h"
 
+#ifdef BOOST_LIB_ISED
 #include <boost/noncopyable.hpp>
+#endif  // BOOST_LIB_ISED
 
 #include <cassert>
 #include <deque>
@@ -49,7 +52,13 @@ public:
 /// class calculate points on diagram liquid-steam-gas
 /// for more information visit:
 ///    https://en.wikipedia.org/wiki/Maxwell_construction
+#ifdef BOOST_LIB_ISED
 class PhaseDiagram: boost::noncopyable {
+#else 
+class PhaseDiagram {
+  PhaseDiagram(const PhaseDiagram &) = delete;
+  PhaseDiagram &operator=(const PhaseDiagram &) = delete;
+#endif  // BOOST_LIB_ISED
   struct uniqueMark {
     uint32_t mn;
     double   acentricfactor;
@@ -88,6 +97,9 @@ public:
   //   для этих параметров, точек на бинодали.
   binodalpoints GetBinodalPoints(double VK, double PK, double TK,
       modelName mn, double acentric);
+  // for gas_mix
+  binodalpoints GetBinodalPoints(parameters_mix &components,
+      modelName mn);
   // just for lulz
   void EraseBinodalPoints(modelName mn, double acentric);
 };
