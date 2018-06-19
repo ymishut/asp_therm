@@ -1,7 +1,8 @@
 #ifndef _CORE__GAS_PARAMETERS__GAS_DESCRIPTION_H_
 #define _CORE__GAS_PARAMETERS__GAS_DESCRIPTION_H_
 
-#include "common.h"
+#include "target_sys.h"
+// #include "common.h"
 
 #include <array>
 #include <string>
@@ -159,7 +160,8 @@ public:
   static const_parameters *Init(double vk, double pk,
       double tk, double mol, double af);
 //  static constgasparameters *Init(std::array<double, 5> vec);
-
+  const_parameters(const const_parameters &cgp);
+  const_parameters operator= (const const_parameters &cgp);
 };
 
 // ================================================================

@@ -17,37 +17,37 @@
 
 class Equation_of_state {
 protected:
-  virtual modelGeneral *GetCalculatingModel(modelName mn, parameters prs,
-      const_parameters cgp, dyn_parameters dgp) = 0;
+  virtual modelGeneral *GetCalculatingModel(parameters prs,
+      const_parameters cgp, dyn_parameters dgp, modelName mn) = 0;
 
-  virtual modelGeneral *GetCalculatingModel(modelName mn, parameters prs,
-      parameters_mix &components) = 0;
+  virtual modelGeneral *GetCalculatingModel(parameters prs,
+      parameters_mix &components, modelName mn) = 0;
 
   virtual ~Equation_of_state();
 };
 
 class Ideal_gas_equation: protected Equation_of_state {
 public:
-   modelGeneral *GetCalculatingModel(modelName mn, parameters prs,
-       const_parameters cgp, dyn_parameters dgp);
-  modelGeneral *GetCalculatingModel(modelName mn, parameters prs,
-      parameters_mix &components);
+   modelGeneral *GetCalculatingModel(parameters prs,
+      const_parameters cgp, dyn_parameters dgp, modelName mn);
+  modelGeneral *GetCalculatingModel(parameters prs,
+      parameters_mix &components, modelName mn);
 };
 
 class Redlich_Kwong_equation: protected Equation_of_state {
 public:
-   modelGeneral *GetCalculatingModel(modelName mn, parameters prs,
-       const_parameters cgp, dyn_parameters dgp);
-  modelGeneral *GetCalculatingModel(modelName mn, parameters prs,
-      parameters_mix &components);
+   modelGeneral *GetCalculatingModel(parameters prs,
+      const_parameters cgp, dyn_parameters dgp, modelName mn);
+  modelGeneral *GetCalculatingModel(parameters prs,
+      parameters_mix &components, modelName mn);
 };
 
 class Peng_Robinson_equation: protected Equation_of_state {
 public:
-   modelGeneral *GetCalculatingModel(modelName mn, parameters prs,
-       const_parameters cgp, dyn_parameters dgp);
-  modelGeneral *GetCalculatingModel(modelName mn, parameters prs,
-      parameters_mix &components);
+   modelGeneral *GetCalculatingModel(parameters prs,
+      const_parameters cgp, dyn_parameters dgp, modelName mn);
+  modelGeneral *GetCalculatingModel(parameters prs,
+      parameters_mix &components, modelName mn);
 };
 
 // DEVELOP to new file

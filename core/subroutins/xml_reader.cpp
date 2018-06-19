@@ -1,6 +1,6 @@
 #include "xml_reader.h"
 
-#include "target.h"
+#include "target_sys.h"
 #include "models_errors.h"
 
 #include <assert.h>
@@ -26,14 +26,14 @@ struct FileReader {
   FileReader(char *name) {
     if (name == NULL) {
 #ifdef _DEBUG
-      set_error_code(ERR_FILEIO_T | ERR_FILE_IN);
+      set_error_code(ERR_FILEIO_T | ERR_FILE_IN_ST);
       set_error_message("filename is empty");
 #endif  // _DEBUG
       return;
     }
     file = fopen(name, "rb");
     if (file == NULL) {
-      set_error_code(ERR_FILEIO_T | ERR_FILE_IN);
+      set_error_code(ERR_FILEIO_T | ERR_FILE_IN_ST);
       char err[ERR_MSG_MAX_LEN] = {0};
       strncpy(err, name, ERR_MSG_MAX_LEN - 30);
       strcat(err, "file not found");
@@ -64,21 +64,22 @@ private:
 /// nx_str_begin  - begin of NEXT string
 /// is_multiline  - is multiline comment
 bool is_comment(const char *str_begin, const char *nx_str_begin,
-    bool &is_multiline = false) {
+    bool &is_multiline) {
+  is_multiline = false;
   if (str_begin == NULL)
     return true;
-  char *tmp_ch = str_begin;
+  char *tmp_ch = (char *)str_begin;
   char *str_end = NULL;
   // if line is last in file
   //   nx_str_begin == NULL
   if (nx_str_begin == NULL) {
-    str_end = strchr(str_begin, '\n');
+    str_end = (char *)strchr(str_begin, '\n');
     if (str_end == NULL)
       return true;
   } else {
     if (nx_str_begin < str_begin)
       return true;
-    str_end = nx_str_begin - 1;
+    str_end = (char *)nx_str_begin - 1;
   }
   // now can check data
   while (tmp_ch != str_end) {
@@ -116,15 +117,63 @@ bool is_comment(const char *str_begin, const char *nx_str_begin,
 // class XMLReader
 // =========================================================================
   // subclass xml_node
-XMLReader::xml_node *XMLReader::xml_node::Init(int line_number,
+XMLReader::xml_node::xml_node(int line_number,
      const std::vector<char *> &content, bool utf8toCP1251)
-  : name(""), line_number(line_number), content(content),
-    utf8toCP125(utf8toCP1251) {
+  : xml_pair(), line_number(line_number), content(content),
+    utf8toCP1251(utf8toCP1251) {
   init();
 }
 
 bool XMLReader::xml_node::init() {
   assert(0);
+  bool is_multiline_com = false;
+  // if is comment - skip line,
+  // if is multicomment find "-->" in lines
+  // else   - init node
+  int curr_line = line_number;
+  while(1) {
+    if (is_comment(content[curr_line], content[curr_line + 1], is_multiline_com)) {
+      if (is_multiline_com) {
+        while (!is_in(content[++curr_line], "-->"))
+          if (content[curr_line] == NULL)
+            return false;
+      }
+      is_multiline_com = false;
+      if (constent[++curr_line] == NULL) {
+        return false;
+        // break;
+      }
+    }
+    break;
+  }
+  // init node
+  assert(0);
+    
+}
+
+// tested
+bool XMLReader::xml_node::is_in(const char *str, 
+    const char *substr) { 
+  if ((!str) || (!substr)) {
+    set_error_code(ERR_STRING_T || ERR_STR_NULL_ST);
+    return false;
+  }
+  int str_len = strlen(str);
+  int substr_len = strlen(substr);
+  if (substr_len > str_len)
+    return false;
+  char *tmp_chp = (char *)str;
+  while (tmp_chp = (char *)strchr(tmp_chp, substr[substr_len - 1])) {
+    if ((tmp_chp - str) < (substr_len - 1)) {
+      ++tmp_chp;
+      continue;
+    }
+    if (strncmp((tmp_chp - substr_len + 1), substr, substr_len))
+      ++tmp_chp;
+    else
+      return true;
+  }
+  return false;
 }
 
 XMLReader::XMLReader(char *begin, char *end, bool utf8toCP1251)

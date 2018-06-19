@@ -14,24 +14,26 @@
 class XMLReader {
   // обычная пара тэг-значение
   struct xml_pair {
-    std::string tag;
+    std::string name;
     std::string value;
 
     xml_pair(std::string tag, std::string value)
-      : tag(tag), value(value) {}
+      : name(tag), value(value) {}
 
     xml_pair()
-      : tag(std::string()), value(std::string()) {}
+      : name(std::string()), value(std::string()) {}
   };
   // для однозначной индификации пары тэг-значение
-  class xml_node {
+  class xml_node : private xml_pair {
   public:
     // name of node
-    std::string name;
+    //   std::string name;
     // номер первой строки ЭТОГО узла в документе
     int line_number;
     // номер ПОСЛЕДНЕЙ строки ЭТОГО узла в документе
     int last_line_number;
+    // номер текущей строки
+    int current_line_number;
     // указатели на начала строк в xml
     const std::vector<char *> &content;
     // копии извлеченныx данных с тэгами с ключем
@@ -44,15 +46,22 @@ class XMLReader {
     // установим в true если формат документа не правильный
     bool is_ill_formed;
 
-  public:
+  private:
+    std::string get_next_tag();
+    // find substr in str
+    bool is_in(const char *str, const char *substr);
+
     xml_node(int line_number,
-         const std::vector<char *> &content, bool utf8toCP1251);
+        const std::vector<char *> &content, bool utf8toCP1251);
+
+  public:
+    xml_node *Init(int line_number,
+        const std::vector<char *> &content, bool utf8toCP1251);
     // return nullptr if nodename not in inner_root
     xml_node *GetNode(const std::string &nodename) const;
     // return "" if tag not in data
     std::string GetValue(const std::string &tag) const;
 
-  private:
     bool init();
   };
 

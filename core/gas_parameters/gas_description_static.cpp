@@ -24,6 +24,7 @@ GasParameters::GasParameters(parameters prs,
 GasParameters *GasParameters::Init(parameters prs,
     const const_parameters cgp, dyn_parameters dgp) {
   assert(0);
+  return NULL;
 }
 
 GasParameters::~GasParameters() {}

@@ -29,7 +29,8 @@ const char *custom_msg_calculate[] {
 const char *custom_msg_string[] {
   "string processing error ",
   "string len error ",
-  "string parsing error "
+  "string parsing error ",
+  "passed null string "
 };
 
 const char *custom_msg_init[] {

@@ -43,6 +43,9 @@ protected:
 protected:
   GasParameters_mix(parameters prs, const_parameters cgp,
       dyn_parameters dgp, parameters_mix components);
+
+ public:
+   virtual ~GasParameters_mix();
 };
 
 

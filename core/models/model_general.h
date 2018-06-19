@@ -1,7 +1,7 @@
 #ifndef _CORE__MODELS__MODEL_GENERAL_H_
 #define _CORE__MODELS__MODEL_GENERAL_H_
 
-#include "target.h"
+#include "target_sys.h"
 
 #include "gas_description.h"
 #include "gas_description_static.h"
@@ -9,7 +9,7 @@
 #include "phase_diagram.h"
 
 #ifdef BOOST_LIB_ISED
-#include <boost/noncopyable.hpp>
+  #include <boost/noncopyable.hpp>
 #endif  // BOOST_LIB_ISED
 
 #include <array>
@@ -64,8 +64,8 @@ protected:
   state_phase setState_phase(double v, double p, double t);
   int32_t  setState_phasesub(double p);
   void setParameters(double v, double p, double t);
-  void setDynamicParameters();
-  void setStaticParameters();
+//  void setDynamicParameters();
+//  void setStaticParameters();
 
   const GasParameters *getGasParameters() const;
 

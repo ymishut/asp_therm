@@ -25,7 +25,7 @@ IdealGas *IdealGas::Init(modelName mn, parameters prs,
   IdealGas *tmp = new IdealGas(mn, prs, cgp, dgp, bp);
   if (tmp == nullptr)
     return nullptr;
-  if (tmp->getGasParameters == nullptr) {
+  if (tmp->getGasParameters() == nullptr) {
     delete tmp;
     return nullptr;
   }
@@ -41,7 +41,7 @@ IdealGas *IdealGas::Init(modelName mn, parameters prs,
   IdealGas *tmp = new IdealGas(mn, prs, components, bp);
   if (tmp == nullptr)
     return nullptr;
-  if (tmp->getGasParameters == nullptr) {
+  if (tmp->getGasParameters() == nullptr) {
     delete tmp;
     return nullptr;
   }

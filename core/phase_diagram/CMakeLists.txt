@@ -1,10 +1,11 @@
-cmake_minimum_required(VERSION 2.8)
+#cmake_minimum_required(VERSION 3.5)
 add_compile_options(-Wall -std=c++11)
 
-include_directories(../common)
-include_directories(../target)
-include_directories(../gas_parameters)
-include_directories(../subroutins)
+project(lphase_diagram)
+#include_directories(${PROJECT_SOURCE_DIR}/common)
+#include_directories(${PROJECT_SOURCE_DIR}/target_sys)
+#include_directories(${PROJECT_SOURCE_DIR}/gas_parameters)
+#include_directories(${PROJECT_SOURCE_DIR}/subroutins)
 
 set(
   PHASE_DIAGRAM_SRC
@@ -13,4 +14,21 @@ set(
   phase_diagram_models.cpp
 )
 
-add_library(phase_diagram_lib ${PHASE_DIAGRAM_SRC})
+add_library(${PROJECT_NAME} STATIC ${PHASE_DIAGRAM_SRC})
+
+target_include_directories( ${PROJECT_NAME}
+  PUBLIC ${PROJECT_SOURCE_DIR}/../common)
+target_include_directories( ${PROJECT_NAME}
+  PUBLIC ${PROJECT_SOURCE_DIR}/../target_sys)
+target_include_directories( ${PROJECT_NAME}
+  PUBLIC ${PROJECT_SOURCE_DIR}/../gas_parameters)
+target_include_directories( ${PROJECT_NAME}
+  PUBLIC ${PROJECT_SOURCE_DIR}/../subroutins)
+
+link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+
+target_link_libraries(${PROJECT_NAME} 
+    itarget_sys
+    lcommon
+	lgas_parameters
+)

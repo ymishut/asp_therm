@@ -55,6 +55,14 @@ const_parameters
   return new const_parameters(vk, pk, tk, mol, tempR, af);
 }
 
+const_parameters::const_parameters(const const_parameters &cgp) 
+  : V_K(cgp.V_K), P_K(cgp.P_K), T_K(cgp.T_K), 
+    molecularmass(cgp.molecularmass), R(cgp.R),
+    acentricfactor(cgp.acentricfactor) {}
+
+const_parameters const_parameters::operator= (const const_parameters &cgp) {
+  return const_parameters(cgp);
+}
 /*
 const_parameters
 *const_parameters::Init(std::array<double, 5> vec) {
@@ -68,7 +76,7 @@ const_parameters
 bool is_valid_cgp(const const_parameters &cgp) {
   if (!is_above0(cgp.acentricfactor, cgp.molecularmass,
       cgp.P_K, cgp.R, cgp.T_K, cgp.V_K)) {
-    set_error_code(ERR_INIT_T | ERR_INIT_ZERO);
+    set_error_code(ERR_INIT_T | ERR_INIT_ZERO_ST);
     return false;
   }
   return true;
@@ -77,7 +85,7 @@ bool is_valid_cgp(const const_parameters &cgp) {
 bool is_valid_dgp(const dyn_parameters &dgp) {
   if (!is_above0(dgp.heat_cap_pres, dgp.beta_kr,
       dgp.heat_cap_vol, dgp.internal_energy)) {
-    set_error_code(ERR_INIT_T | ERR_INIT_ZERO);
+    set_error_code(ERR_INIT_T | ERR_INIT_ZERO_ST);
     return false;
   }
   return true;

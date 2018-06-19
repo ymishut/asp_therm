@@ -21,6 +21,9 @@ protected:
   // dyn_parameters содержат несколько важных полей
   dyn_parameters  dyn_params_;
 
+public:
+  const_parameters const_params;
+
 protected:
   GasParameters(double v, double p, double t,
       const const_parameters cgp, dyn_parameters dgp);
@@ -31,10 +34,6 @@ protected:
   static GasParameters *Init(parameters prs,
       const const_parameters cgp, dyn_parameters dgp);
 
-  virtual ~GasParameters();
-
-public:
-  const_parameters const_params;
 
 public:
   double cgetV_K()            const;
@@ -56,6 +55,7 @@ public:
   double cgetBeta()       const;
 
   virtual void csetParameters(double v, double p, double t, state_phase sp);
+  virtual ~GasParameters();
 };
 
 std::ostream& operator<< (std::ostream &outstream, const GasParameters &gp);

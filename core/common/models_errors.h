@@ -36,6 +36,7 @@
 // string errors
 #define ERR_STR_MAX_LEN_ST 0x0100
 #define ERR_STR_PARSE_ST   0x0200
+#define ERR_STR_NULL_ST    0x0300
 
 // init errors
 #define ERR_INIT_ZERO_ST   0x0100

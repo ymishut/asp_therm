@@ -1,7 +1,6 @@
 #include "model_general.h"
 
 #include "gas_description_dynamic.h"
-#include "gas_mix_init.h"
 #include "models_errors.h"
 
 #include <algorithm>

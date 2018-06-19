@@ -64,6 +64,7 @@ GasParameters_mix::GasParameters_mix(parameters prs, const_parameters cgp,
       dyn_parameters dgp, parameters_mix components)
   : GasParameters(prs, cgp, dgp), components_(components) {}
 
+ GasParameters_mix::~GasParameters_mix() {}
 /*
 GasParameters_mix *GasParameters_mix::Init(parameters prs,
       parameters_mix components) {
@@ -134,7 +135,7 @@ GasParameters_mix_dyn::GasParameters_mix_dyn(parameters prs,
 GasParameters_mix_dyn *GasParameters_mix_dyn::Init(
     parameters prs, parameters_mix components, modelGeneral *mg) {
   if (components.empty() || mg == nullptr) {
-    set_error_code(ERR_INIT_T | ERR_INIT_NULLP | ERR_GAS_MIX);
+    set_error_code(ERR_INIT_T | ERR_INIT_NULLP_ST | ERR_GAS_MIX);
     return nullptr;
   }
 // РАСЧИТАЕМ СРЕДНИЕ КОНСТАНТНЫЕ ПАРАМЕТРЫ
@@ -148,7 +149,7 @@ GasParameters_mix_dyn *GasParameters_mix_dyn::Init(
       avr_vals[0], avr_vals[1], avr_vals[2],
       /* 0.0 throw excep */ avr_vals[3], avr_vals[4]));
   if (tmp_cgp == nullptr) {
-    set_error_code(ERR_INIT_T | ERR_GAS_MIX | ERR_CALC_GAS_P);
+    set_error_code(ERR_INIT_T | ERR_GAS_MIX | ERR_CALC_GAS_P_ST);
     return nullptr;
   }
   // инициализируем динамические параметры
@@ -170,7 +171,7 @@ GasParameters_mix_dyn *GasParameters_mix_dyn::Init(
   std::unique_ptr<dyn_parameters> tmp_dgp(dyn_parameters::Init(
       dgp_tmp[0], dgp_tmp[1], dgp_tmp[2], prs));
   if (tmp_dgp == nullptr) {
-    set_error_code(ERR_INIT_T | ERR_GAS_MIX | ERR_CALC_GAS_P);
+    set_error_code(ERR_INIT_T | ERR_CALC_GAS_P_ST | ERR_GAS_MIX);
     return nullptr;
   }
   return new GasParameters_mix_dyn(prs, *tmp_cgp, *tmp_dgp,
@@ -180,7 +181,7 @@ GasParameters_mix_dyn *GasParameters_mix_dyn::Init(
 std::unique_ptr<const_parameters> GasParameters_mix_dyn::GetAverageParams(
     parameters_mix &components) {
   if (components.empty()) {
-    set_error_code(ERR_INIT_T | ERR_INIT_NULLP | ERR_GAS_MIX);
+    set_error_code(ERR_INIT_T | ERR_INIT_NULLP_ST | ERR_GAS_MIX);
     return nullptr;
   }
 // РАСЧИТАЕМ СРЕДНИЕ КОНСТАНТНЫЕ ПАРАМЕТРЫ
@@ -194,7 +195,7 @@ std::unique_ptr<const_parameters> GasParameters_mix_dyn::GetAverageParams(
       avr_vals[0], avr_vals[1], avr_vals[2],
       /* 0.0 throw excep */ avr_vals[3], avr_vals[4]));
   if (tmp_cgp == nullptr) {
-    set_error_code(ERR_INIT_T | ERR_GAS_MIX | ERR_CALC_GAS_P);
+    set_error_code(ERR_INIT_T | ERR_GAS_MIX | ERR_CALC_GAS_P_ST);
     return nullptr;
   }
   return tmp_cgp;
